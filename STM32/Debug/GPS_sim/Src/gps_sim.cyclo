@@ -1,0 +1,5 @@
+../GPS_sim/Src/gps_sim.c:45:6:StartGPSTask	5
+../GPS_sim/Src/gps_sim.c:92:14:rand_float_range	1
+../GPS_sim/Src/gps_sim.c:97:17:rand_uint_range	1
+../GPS_sim/Src/gps_sim.c:102:13:update_position_randomly	5
+../GPS_sim/Src/gps_sim.c:116:6:send_gps_msg	1
