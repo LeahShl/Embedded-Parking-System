@@ -24,11 +24,16 @@ void StartI2CSenderTask(void *argument)
 			else if(msg.msg_type == MSG_START) type_str = "START";
 			else if(msg.msg_type == MSG_STOP) type_str = "STOP";
 
-			printf("Sent %s message: license=%08lu, time=%lu, lat=%.6f, lon=%.6f\n",
+			printf("Sending %s message: license=%08lu, time=%lu, lat=%.6f, lon=%.6f\n",
 		           type_str, (unsigned long)msg.license_id, (unsigned long)msg.utc_seconds,
 		           msg.latitude, msg.longitude);
 
-			HAL_I2C_Master_Transmit(&hi2c1, DEVICE_I2C_ADDR << 1, (uint8_t*)&msg, sizeof(msg), HAL_MAX_DELAY);
+			HAL_StatusTypeDef ret = HAL_I2C_Slave_Transmit(&hi2c1, (uint8_t*)&msg, sizeof(msg), HAL_MAX_DELAY);
+
+			if (ret != HAL_OK)
+			{
+				printf("I2C Transmit failed with code: %d\n", ret);
+			}
 		}
 
 	}

@@ -10,8 +10,6 @@
 
 #include <stdint.h>
 
-#define DEVICE_I2C_ADDR 0x10
-
 typedef enum {
     MSG_IDLE = 0,
     MSG_START = 1,

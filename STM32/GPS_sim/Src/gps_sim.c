@@ -32,7 +32,7 @@ static void update_position_randomly(void);
 static void send_gps_msg(msg_type_t type);
 
 // Globals
-static uint32_t utc_seconds = 0;
+volatile uint32_t utc_seconds = 0;
 static float lat = 0.0f;
 static float lon = 0.0f;
 static uint8_t is_parking = 0;
@@ -52,8 +52,6 @@ void StartGPSTask(void *argument)
 
 	while (1)
 	{
-		utc_seconds++;
-
 		if (is_parking)
 		{
 			if (park_counter == 0)
