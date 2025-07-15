@@ -12,85 +12,47 @@
 #include <sys/stat.h>
 #include <errno.h>
 
-static const char *default_config =
-    "i2c_bus=/dev/i2c-1\n"
-    "i2c_addr=0x10\n"
-    "server_ip=192.168.1.71\n"
-    "server_port=12321\n";
-
 int load_config(Config *cfg)
 {
-    const char *home = getenv("HOME");
-    if (!home)
+    FILE *fd = fopen(CONFIG_PATH, "r");
+    if (!fd)
     {
-        perror("HOME environment variable not set\n");
+        perror("fopen config");
         return -1;
     }
 
-    char dir_path[1024], config_path[512];
-    snprintf(dir_path, sizeof(dir_path), "%s/%s", home, CONFIG_DIR);
-    snprintf(config_path, sizeof(config_path), "%s/%s", home, CONFIG_PATH);
+    // Set defaults
+    strcpy(cfg->i2c_bus, DEFAULT_I2C_BUS);
+    cfg->i2c_addr = DEFAULT_I2C_ADDR;
+    strcpy(cfg->server_ip, DEFAULT_SERVER_IP);
+    cfg->server_port = DEFAULT_SERVER_PORT;
+    strcpy(cfg->log_path, DEFAULT_LOG_PATH);
+    strcpy(cfg->service_name, DEFAULT_SERVICE_NAME);
+    strcpy(cfg->service_path, DEFAULT_SERVICE_PATH);
 
-    printf("config dir: %s\nconfig file: %s\n", dir_path, config_path);
-
-
-    // Create directory if it doesn't exist
-    struct stat st = {0};
-    if (stat(dir_path, &st) == -1)
-    {
-        if (mkdir(dir_path, 0755) < 0)
-        {
-            perror("mkdir");
-            return -1;
-        }
-    }
-
-    FILE *fd = fopen(config_path, "r");
-    if (!fd)
-    {
-        // File doesn't exist: create with defaults
-        fd = fopen(config_path, "w");
-        if (!fd)
-        {
-            perror("fopen for writing");
-            return -1;
-        }
-
-        fprintf(fd, "%s", default_config);
-        fclose(fd);
-
-        fd = fopen(config_path, "r");
-        if (!fd)
-        {
-            perror("fopen for reading");
-            return -1;
-        }
-    }
-
-    // Set defaults first
-    strcpy(cfg->i2c_bus, "/dev/i2c-1");
-    cfg->i2c_addr = 0x10;
-    strcpy(cfg->server_ip, "192.168.1.71");
-    cfg->server_port = 12321;
-
-    // Parse config file
-    char line[128];
+    char line[256];
     while (fgets(line, sizeof(line), fd))
     {
         if (line[0] == '#' || line[0] == '\n')
             continue;
 
-        char key[64], val[64];
-        if (sscanf(line, "%63[^=]=%63s", key, val) == 2)
+        char key[64], val[192];
+        if (sscanf(line, "%63[^=]=%191s", key, val) == 2)
         {
             if (strcmp(key, "i2c_bus") == 0)
                 strncpy(cfg->i2c_bus, val, sizeof(cfg->i2c_bus));
             else if (strcmp(key, "i2c_addr") == 0)
-                cfg->i2c_addr = (int)strtol(val, NULL, 0);  // can handle hex or decimal
+                cfg->i2c_addr = (int)strtol(val, NULL, 0);
             else if (strcmp(key, "server_ip") == 0)
                 strncpy(cfg->server_ip, val, sizeof(cfg->server_ip));
             else if (strcmp(key, "server_port") == 0)
                 cfg->server_port = atoi(val);
+            else if (strcmp(key, "log_path") == 0)
+                strncpy(cfg->log_path, val, sizeof(cfg->log_path));
+            else if (strcmp(key, "service_name") == 0)
+                strncpy(cfg->service_name, val, sizeof(cfg->service_name));
+            else if (strcmp(key, "service_path") == 0)
+                strncpy(cfg->service_path, val, sizeof(cfg->service_path));
         }
     }
 
