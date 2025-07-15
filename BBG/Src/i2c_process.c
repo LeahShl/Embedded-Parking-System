@@ -1,61 +1,43 @@
 /**
- * @file main.c
+ * @file i2c_process.c
  * @author Leah
- * @brief Parking system project file for BBG
- * @date 2025-07-14
+ * @brief Multiprocessing I2C communication for parksys
+ * @date 2025-07-15
+ * 
  */
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
+#include "i2c_process.h"
+#include "gps_msg.h"
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
 #include <linux/i2c-dev.h>
 #include <errno.h>
+#include <stdio.h>
 #include <string.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <time.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <stdbool.h>
 
-#define I2C_BUS        "/dev/i2c-1"    // I2C bus must be added as system's overlay
-#define I2C_ADDR       0x10            // STM32 I2C slave address
-#define MSG_LEN        17              // 1 + 4 + 4 + 4 + 4 bytes
-
-typedef struct __attribute__((packed))
+void run_i2c_process(int write_fd, const Config *cfg)
 {
-    uint8_t  msg_type;                 // 0=idle, 1=start, 2=stop
-    uint32_t license_id;               // 0-99999999
-    uint32_t utc_sec;                  // seconds since reference
-    float    latitude;                 // degrees
-    float    longitude;                // degrees
-} gps_msg_t;
-
-const char *type_str(uint8_t t)
-{
-    switch (t)
-    {
-        case 0: return "IDLE";
-        case 1: return "START";
-        case 2: return "STOP";
-        default: return "UNKNOWN";
-    }
-}
-
-int main(void)
-{
-    int fd = open(I2C_BUS, O_RDWR);
+    int fd = open(cfg->i2c_bus, O_RDWR);
     if (fd < 0)
     {
-        perror("open " I2C_BUS);
-        return 1;
+        perror("open i2c_bus");
+        exit(EXIT_FAILURE);
     }
 
-    if (ioctl(fd, I2C_SLAVE, I2C_ADDR) < 0)
+    if (ioctl(fd, I2C_SLAVE, cfg->i2c_addr) < 0)
     {
         perror("ioctl I2C_SLAVE");
         close(fd);
-        return 1;
+        exit(EXIT_FAILURE);
     }
 
-    printf("[I2C] Listening on %s @0x%02X ...\n", I2C_BUS, I2C_ADDR);
+    printf("[I2C] Listening on %s @0x%02X ...\n", cfg->i2c_bus, cfg->i2c_addr);
 
     while (1)
     {
@@ -67,7 +49,7 @@ int main(void)
             if (errno == EAGAIN || errno == EINTR || errno == EBUSY || errno == EIO || errno == ENXIO)
             {
                 fprintf(stderr, "[I2C] Warning: read failed (%s), retrying...\n", strerror(errno));
-                usleep(500000); 
+                usleep(500000);
                 continue;
             }
             continue;
@@ -89,6 +71,7 @@ int main(void)
             continue;
         }
 
+        if (msg.msg_type == 0)
         printf("[I2C] msg_type=%s(%u), license=%08u, utc_sec=%u, lat=%.6f, lon=%.6f\n",
                type_str(msg.msg_type),
                msg.msg_type,
@@ -97,9 +80,16 @@ int main(void)
                msg.latitude,
                msg.longitude);
 
+        // Forward only START/STOP messages to pipe
+        if (msg.msg_type == 1 || msg.msg_type == 2) {
+            ssize_t wr = write(write_fd, &msg, sizeof(msg));
+            if (wr != sizeof(msg)) {
+                fprintf(stderr, "[I2C] Failed to write to pipe: %s\n", strerror(errno));
+            }
+        }
+
         sleep(1);
     }
 
     close(fd);
-    return 0;
 }

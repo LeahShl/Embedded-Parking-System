@@ -1,22 +1,30 @@
 C = arm-linux-gnueabihf-gcc
-CFLAGS = -Wall -Wextra -ggdb
-LDFLAGS = -lpthread
+CFLAGS = -Wall -Wextra -ggdb -IInc
+LDFLAGS = 
 
-OBJS = main.o
-TARGET = parksys
+SRCDIR = Src
+INCDIR = Inc
+OBJDIR = Obj
+
+SOURCES := $(wildcard $(SRCDIR)/*.c)
+OBJECTS := $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(SOURCES))
+TARGET := parksys
+
+.PHONY: all clean upload
 
 all: $(TARGET)
 
-$(TARGET): $(OBJS)
-	$(C) $(OBJS) -o $(TARGET) $(LDFLAGS)
+$(TARGET): $(OBJECTS)
+	$(C) $(OBJECTS) -o $@ $(LDFLAGS)
 
-%.o: %.c
+$(OBJDIR)/%.o: $(SRCDIR)/%.c | $(OBJDIR)
 	$(C) $(CFLAGS) -c $< -o $@
 
-PHONY: clean upload
+$(OBJDIR):
+	mkdir -p $(OBJDIR)
 
 upload:
 	scp $(TARGET) debian@192.168.7.2:/home/debian
 
 clean:
-	rm *.o
+	rm -rf $(OBJDIR) $(TARGET)
