@@ -13,6 +13,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <signal.h>
 
 int main(void)
 {
@@ -27,7 +28,7 @@ int main(void)
     printf("  i2c_bus    = %s\n", cfg.i2c_bus);
     printf("  i2c_addr   = 0x%02X\n", cfg.i2c_addr);
     printf("  server_ip  = %s\n", cfg.server_ip);
-    printf("  server_port= %d\n", cfg.server_port);
+    printf("  server_port= %d\n\n", cfg.server_port);
 
     int pipefd[2];
     if (pipe(pipefd) < 0)
@@ -36,29 +37,35 @@ int main(void)
         return 1;
     }
 
-    pid_t pid = fork();
-    if (pid < 0)
+    pid_t i2c_pid = fork();
+    if (i2c_pid == 0)
     {
-        perror("fork");
-        return 1;
-    }
-    else if (pid == 0)
-    {
-        // Child will run I2C process
         close(pipefd[0]);
         run_i2c_process(pipefd[1], &cfg);
 
-        exit(EXIT_FAILURE); // Ensure child dies on failure
+        exit(EXIT_FAILURE); // Shouldn't reach here
     }
-    else
+
+    pid_t eth_pid = fork();
+    if (eth_pid == 0)
     {
-        // Parent will run ETH process
+        /* 
+          Temporary closed socket (for example, server briefly disconnects)
+          will cause a SIGPIPE, which normally kills the eth proccess. Ignoring this
+          signal will keep the system running even when the server is unavailable.
+        */
+        signal(SIGPIPE, SIG_IGN);
+
         close(pipefd[1]); 
         run_eth_process(pipefd[0], &cfg);
 
-        wait(NULL); // Parent should live
+        exit(EXIT_FAILURE); // Shouldn't reach here
     }
 
+
     // Shouldn't reach here
+    int status;
+    waitpid(i2c_pid, &status, 0);
+    waitpid(eth_pid, &status, 0);
     return EXIT_SUCCESS;
 }
