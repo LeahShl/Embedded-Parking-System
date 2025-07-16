@@ -12,32 +12,28 @@
 #include <sys/ioctl.h>
 #include <linux/i2c-dev.h>
 #include <errno.h>
-#include <stdio.h>
 #include <string.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include <time.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <stdbool.h>
+#include <syslog.h>
 
 void run_i2c_process(int write_fd, const Config *cfg)
 {
     int fd = open(cfg->i2c_bus, O_RDWR);
     if (fd < 0)
     {
-        perror("open i2c_bus");
+        syslog(LOG_ERR, "[I2C] open i2c_bus: %s", strerror(errno));
         exit(EXIT_FAILURE);
     }
 
     if (ioctl(fd, I2C_SLAVE, cfg->i2c_addr) < 0)
     {
-        perror("ioctl I2C_SLAVE");
+        syslog(LOG_ERR, "[I2C] ioctl I2C_SLAVE: %s", strerror(errno));
         close(fd);
         exit(EXIT_FAILURE);
     }
 
-    printf("[I2C] Listening on %s @0x%02X ...\n", cfg->i2c_bus, cfg->i2c_addr);
+    syslog(LOG_INFO, "[I2C] Listening on %s @0x%02X ...\n", cfg->i2c_bus, cfg->i2c_addr);
 
     while (1)
     {
@@ -48,7 +44,7 @@ void run_i2c_process(int write_fd, const Config *cfg)
         {
             if (errno == EAGAIN || errno == EINTR || errno == EBUSY || errno == EIO || errno == ENXIO)
             {
-                fprintf(stderr, "[I2C] Warning: read failed (%s), retrying...\n", strerror(errno));
+                syslog(LOG_WARNING, "[I2C] Warning: read failed (%s), retrying...\n", strerror(errno));
                 usleep(500000);
                 continue;
             }
@@ -57,7 +53,7 @@ void run_i2c_process(int write_fd, const Config *cfg)
 
         if (rd != MSG_LEN)
         {
-            fprintf(stderr, "[I2C] short read: %zd/%d bytes, retrying...\n", rd, MSG_LEN);
+            syslog(LOG_WARNING, "[I2C] short read: %zd/%d bytes, retrying...\n", rd, MSG_LEN);
             usleep(100000);
             continue;
         }
@@ -67,12 +63,12 @@ void run_i2c_process(int write_fd, const Config *cfg)
 
         if (msg.msg_type > 2)
         {
-            fprintf(stderr, "[I2C] Invalid msg_type %u, skipping\n", msg.msg_type);
+            syslog(LOG_WARNING, "[I2C] Invalid msg_type %u, skipping\n", msg.msg_type);
             continue;
         }
 
         if (msg.msg_type == 0)
-        printf("[I2C] msg_type=%s(%u), license=%08u, utc_sec=%u, lat=%.6f, lon=%.6f\n",
+        syslog(LOG_INFO, "[I2C] msg_type=%s(%u), license=%08u, utc_sec=%u, lat=%.6f, lon=%.6f\n",
                type_str(msg.msg_type),
                msg.msg_type,
                msg.license_id,
@@ -84,7 +80,7 @@ void run_i2c_process(int write_fd, const Config *cfg)
         if (msg.msg_type == 1 || msg.msg_type == 2) {
             ssize_t wr = write(write_fd, &msg, sizeof(msg));
             if (wr != sizeof(msg)) {
-                fprintf(stderr, "[I2C] Failed to write to pipe: %s\n", strerror(errno));
+                syslog(LOG_ERR, "[I2C] Failed to write to pipe: %s\n", strerror(errno));
             }
         }
 

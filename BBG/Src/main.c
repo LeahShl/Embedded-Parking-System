@@ -18,19 +18,13 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <string.h>
+#include <syslog.h>
 
 #define CONFIG_PATH     "/etc/parksys/parksys.config"
 #define SERVICE_PATH    "/etc/systemd/system/parksys.service"
 #define SERVICE_NAME    "parksys.service"
 #define LOG_PATH        "/var/log/parksys/parksys.log"
 #define BIN_PATH        "/usr/sbin/parksys"
-
-/**
- * @brief Redirect stdout and stderr to a log file
- * 
- * @param log_path Log file path
- */
-void redirect_logs(const char *log_path);
 
 /**
  * @brief Installs the program on the system 
@@ -70,7 +64,12 @@ int main(int argc, char *argv[])
     }
 
     if (first_time_install() == 1)
-        printf("First time install complete.\n");
+    {
+        printf("[INIT] First-time setup done.\n");
+        printf("Please start the service manually with:\n");
+        printf("  sudo systemctl start parksys\n");
+        return EXIT_SUCCESS; 
+    }
 
     Config cfg;
     if (load_config(&cfg) != 0)
@@ -83,16 +82,10 @@ int main(int argc, char *argv[])
     printf("  i2c_bus     = %s\n", cfg.i2c_bus);
     printf("  i2c_addr    = 0x%02X\n", cfg.i2c_addr);
     printf("  server_ip   = %s\n", cfg.server_ip);
-    printf("  server_port = %d\n\n", cfg.server_port);
+    printf("  server_port = %d\n", cfg.server_port);
     printf("  log_path    = %s\n", cfg.log_path);
     printf("  service_name= %s\n", cfg.service_name);
     printf("  service_path= %s\n\n", cfg.service_path);
-
-    if (daemon(0, 0) < 0)
-    {
-        perror("daemon");
-        return EXIT_FAILURE;
-    }
 
     int pipefd[2];
     if (pipe(pipefd) < 0)
@@ -101,11 +94,26 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    if (daemon(0, 0) < 0)
+    {
+        perror("daemon");
+        return EXIT_FAILURE;
+    }
+
+    // Make sure systemd knows who's the parent
+    FILE *pid_file = fopen("/run/parksys.pid", "w");
+    if (pid_file)
+    {
+        fprintf(pid_file, "%d\n", getpid());
+        fclose(pid_file);
+    }
+
+
     pid_t i2c_pid = fork();
     if (i2c_pid == 0)
     {
         close(pipefd[0]);
-        redirect_logs(LOG_PATH);
+        openlog("parksys-i2c", LOG_PID | LOG_CONS, LOG_DAEMON);
         run_i2c_process(pipefd[1], &cfg);
 
         exit(EXIT_FAILURE); // Shouldn't reach here
@@ -122,43 +130,17 @@ int main(int argc, char *argv[])
         signal(SIGPIPE, SIG_IGN);
 
         close(pipefd[1]); 
-        redirect_logs(LOG_PATH);
+        openlog("parksys-eth", LOG_PID | LOG_CONS, LOG_DAEMON);
         run_eth_process(pipefd[0], &cfg);
 
         exit(EXIT_FAILURE); // Shouldn't reach here
     }
-
 
     // Shouldn't reach here
     int status;
     waitpid(i2c_pid, &status, 0);
     waitpid(eth_pid, &status, 0);
     return EXIT_SUCCESS;
-}
-
-void redirect_logs(const char *log_path)
-{
-    int fd = open(log_path, O_WRONLY | O_CREAT | O_APPEND, 0644);
-    if (fd < 0)
-    {
-        perror("open log");
-        exit(EXIT_FAILURE);
-    }
-
-    if (dup2(fd, STDOUT_FILENO) < 0) {
-        perror("dup2 stdout");
-        exit(EXIT_FAILURE);
-    }
-
-    if (dup2(fd, STDERR_FILENO) < 0) {
-        perror("dup2 stderr");
-        exit(EXIT_FAILURE);
-    }
-
-    close(fd);
-
-    setvbuf(stdout, NULL, _IONBF, 0);
-    setvbuf(stderr, NULL, _IONBF, 0);
 }
 
 static int first_time_install(void)
@@ -228,9 +210,8 @@ static int first_time_install(void)
             "After=network.target\n\n"
             "[Service]\n"
             "ExecStart=/usr/sbin/parksys\n"
-            "Restart=always\n"
-            "StandardOutput=journal\n"
-            "StandardError=journal\n\n"
+            "PIDFile=/run/parksys.pid\n"
+            "Restart=always\n\n"
             "[Install]\n"
             "WantedBy=multi-user.target\n");
     fclose(fsvc);
@@ -241,8 +222,7 @@ static int first_time_install(void)
     system("systemctl daemon-reload");
     system("systemctl enable parksys.service");
 
-    printf("[INIT] Setup complete. Please reboot or run:\n");
-    printf("       sudo systemctl start parksys\n");
+    printf("[INIT] Setup complete. starting service.\n");
 
     return 1; // Signal that setup occurred
 }
