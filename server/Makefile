@@ -1,5 +1,5 @@
 CXX      := g++
-CXXFLAGS := -Wall -Wextra -Weffc++ -IInc -g
+CXXFLAGS := -Wall -Wextra -IInc -g -std=c++14
 LDFLAGS  := -lsqlite3
 
 SRCDIR := Src

@@ -2,28 +2,36 @@
 #include <sqlite3.h>
 #include <string>
 
-enum class pdbStatus
+namespace Parksys
 {
-    PDB_OK = 0,         // Success
-    PDB_ERR             // General error occured
-};
+    enum class pdbStatus
+    {
+        PDB_OK = 0,         // Success
+        PDB_ERR             // General error occured
+    };
 
-class ParkingDB
-{
-public:
-    ParkingDB(std::string path);
-    ParkingDB(ParkingDB *pdb);
-    ~ParkingDB();
+    class Database
+    {
+    public:
+        Database(std::string path);
+        Database(Database *pdb);
+        ~Database();
 
-    pdbStatus startParking();
-    pdbStatus endParking();
-    double calculatePrice();
-    pdbStatus addCity();
-    pdbStatus removeCity();
-    pdbStatus addLot();
-    pdbStatus removeLot();
-    pdbStatus changePrice();
+        // Logging
 
-private:
-    sqlite3 *db;
-};
+        pdbStatus startParking();
+        pdbStatus endParking();
+
+        // Price and data management 
+
+        double calculatePrice();
+        pdbStatus addCity();
+        pdbStatus removeCity();
+        pdbStatus addLot();
+        pdbStatus removeLot();
+        pdbStatus changePrice();
+
+    private:
+        sqlite3 *db;
+    };
+}
