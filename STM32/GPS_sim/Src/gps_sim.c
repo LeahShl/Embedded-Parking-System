@@ -10,6 +10,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define START_LAT 32.0263f       // Starting latitute
+#define START_LON 34.8257f       // Starting longitude
+
 #define LAT_MIN 29.5f            // Minimum latitute
 #define LAT_MAX 33.3f            // Maximun latitude
 #define LON_MIN 34.2f            // Minimum longitude
@@ -45,8 +48,8 @@ extern osMessageQueueId_t gpsMsgQueueHandle;
 void StartGPSTask(void *argument)
 {
 	srand(0);
-	lat = rand_float_range(LAT_MIN, LAT_MAX);
-	lon = rand_float_range(LON_MIN, LON_MAX);
+	lat = START_LAT;
+	lon = START_LON;
 
 	until_next_park = rand_uint_range(PARK_INTERVAL_MIN, PARK_INTERVAL_MAX);
 
