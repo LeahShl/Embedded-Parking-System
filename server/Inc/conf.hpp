@@ -1,7 +1,7 @@
 #pragma once
 
-#define DB_PATH "parksys/parksys.db"
+#define DB_PATH "parksys/parksys.db"  // Database path relative to user's home folder
 
-#define SERVER_IP "0.0.0.0"
-#define SERVER_PORT 12321
-#define REQ_QUEUE_SIZE 8
+#define SERVER_IP "0.0.0.0"           // Don't change that unless you know what you're doing
+#define SERVER_PORT 12321             // Server's listening port
+#define REQ_QUEUE_SIZE 8              // Request queue size for listen()

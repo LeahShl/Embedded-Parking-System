@@ -27,7 +27,8 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    Database db(DB_PATH);
+    std::string db_path = std::string(std::getenv("HOME")) + "/" + DB_PATH;
+    Database db(db_path.c_str());
 
     std::string command = argv[1];
     std::string object = argv[2];

@@ -36,7 +36,7 @@ namespace Parksys
             "CREATE TABLE IF NOT EXISTS Lot ( "
                 "lot_id INTEGER PRIMARY KEY AUTOINCREMENT, "
                 "city_id INTEGER NOT NULL, "
-                "city_name TEXT NOT NULL, "
+                "lot_name TEXT NOT NULL, "
                 "latitude REAL NOT NULL, "
                 "longitude REAL NOT NULL, "
                 "is_hourly INTEGER NOT NULL, "
@@ -50,7 +50,7 @@ namespace Parksys
                 "lot_id INTEGER NOT NULL, "
                 "customer_id INTEGER NOT NULL, "
                 "start_time INTEGER NOT NULL, "
-                "end_time INTEGER NOT NULL, "
+                "end_time INTEGER, "
                 "duration_sec INTEGER, "
                 "total_price REAL, "
                 "FOREIGN KEY(lot_id) REFERENCES Lot(lot_id) "
@@ -105,7 +105,10 @@ namespace Parksys
         
         sqlite3_stmt *stmt = nullptr;
         if (sqlite3_prepare_v2(runtime_db, sql, -1, &stmt, nullptr) != SQLITE_OK)
+        {
+            std::cerr << "[DB] Failed to prepare startParking: " << sqlite3_errmsg(runtime_db) << std::endl;
             return pdbStatus::PDB_ERR;
+        }
         
         sqlite3_bind_int(stmt, 1, lot_id);
         sqlite3_bind_int(stmt, 2, customer_id);
@@ -114,7 +117,13 @@ namespace Parksys
         int rc = sqlite3_step(stmt);
         sqlite3_finalize(stmt);
 
-        return rc == SQLITE_DONE ? pdbStatus::PDB_OK : pdbStatus::PDB_ERR;
+        if (rc == SQLITE_DONE)
+        {
+            flushToDisk();
+            return pdbStatus::PDB_OK;
+        }
+
+        return pdbStatus::PDB_ERR;
     }
 
     pdbStatus Database::endParking(uint32_t customer_id, uint32_t end_time)
@@ -127,7 +136,10 @@ namespace Parksys
         
         sqlite3_stmt *find = nullptr;
         if (sqlite3_prepare_v2(runtime_db, find_sql, -1, &find, nullptr) != SQLITE_OK)
+        {
+            std::cerr << "[DB] Failed to prepare endParking find: " << sqlite3_errmsg(runtime_db) << std::endl;
             return pdbStatus::PDB_ERR;
+        }
         
         sqlite3_bind_int(find, 1, customer_id);
 
@@ -140,11 +152,12 @@ namespace Parksys
 
         int log_id = sqlite3_column_int(find, 0);
         int start_time = sqlite3_column_int(find, 1);
+        int lot_id = sqlite3_column_int(find, 2);
         sqlite3_finalize(find);
 
         // calculate duration and price
         int duration = int(end_time) - start_time;
-        double total = calculatePrice(); 
+        double total = calculatePrice(duration, lot_id); 
 
         // Update the same record
         const char *upd_sql =
@@ -153,7 +166,10 @@ namespace Parksys
         
         sqlite3_stmt *upd = nullptr;
         if (sqlite3_prepare_v2(runtime_db, upd_sql, -1, &upd, nullptr) != SQLITE_OK)
+        {
+            std::cerr << "[DB] Failed to prepare endParking write: " << sqlite3_errmsg(runtime_db) << std::endl;
             return pdbStatus::PDB_ERR;
+        }
         
         sqlite3_bind_int(upd, 1, end_time);
         sqlite3_bind_int(upd, 2, duration);
@@ -163,13 +179,50 @@ namespace Parksys
         rc = sqlite3_step(upd);
         sqlite3_finalize(upd);
 
-        return rc == SQLITE_DONE ? pdbStatus::PDB_OK : pdbStatus::PDB_ERR;
+        if (rc == SQLITE_DONE)
+        {
+            flushToDisk();
+            return pdbStatus::PDB_OK;
+        }
+
+        return pdbStatus::PDB_ERR;
     }
 
-    double Database::calculatePrice()
+    double Database::calculatePrice(int duration_sec, uint32_t lot_id)
     {
-        // TODO: finish this
-        return 0.0;
+        const char *sql = "SELECT is_hourly, price, max_daily_price "
+                          "FROM Lot WHERE lot_id = ?;";
+
+        sqlite3_stmt *stmt = nullptr;
+        if (sqlite3_prepare_v2(runtime_db, sql, -1, &stmt, nullptr) != SQLITE_OK)
+        {
+            std::cerr << "[DB] Failed to prepare calculatePrice: "
+                      << sqlite3_errmsg(runtime_db) << std::endl;
+            return 0.0;
+        }
+
+        sqlite3_bind_int(stmt, 1, lot_id);
+
+        int rc = sqlite3_step(stmt);
+        if (rc != SQLITE_ROW)
+        {
+            sqlite3_finalize(stmt);
+            std::cerr << "[DB] No such lot_id: " << lot_id << " for price calculation\n";
+            return 0.0;
+        }
+
+        int is_hourly = sqlite3_column_int(stmt, 0);
+        double price = sqlite3_column_double(stmt, 1);
+        double max_daily = sqlite3_column_double(stmt, 2);
+
+        sqlite3_finalize(stmt);
+
+        if (!is_hourly)
+            return price;
+
+        int duration_hours = (std::max(duration_sec, 0) + 3599) / 3600;  // rounded up
+        double total = duration_hours * price;
+        return std::min(total, max_daily);
     }
 
     pdbStatus Database::addCity(const std::string &name)
@@ -178,14 +231,23 @@ namespace Parksys
 
         sqlite3_stmt *stmt = nullptr;
         if (sqlite3_prepare_v2(runtime_db, sql, -1, &stmt, nullptr) != SQLITE_OK)
+        {
+            std::cerr << "[DB] Failed to prepare addCity: " << sqlite3_errmsg(runtime_db) << std::endl;
             return pdbStatus::PDB_ERR;
-        
+        }
+
         sqlite3_bind_text(stmt, 1, name.c_str(), -1, SQLITE_TRANSIENT);
 
         int rc = sqlite3_step(stmt);
         sqlite3_finalize(stmt);
 
-        return rc == SQLITE_DONE ? pdbStatus::PDB_OK : pdbStatus::PDB_ERR;
+        if (rc == SQLITE_DONE)
+        {
+            flushToDisk();
+            return pdbStatus::PDB_OK;
+        }
+
+        return pdbStatus::PDB_ERR;
     }
 
     pdbStatus Database::removeCity(uint32_t city_id)
@@ -193,7 +255,12 @@ namespace Parksys
         // Delete all lots first (FK)
         const char *del_lots = "DELETE FROM Lot WHERE city_id = ?;";
         sqlite3_stmt *st1 = nullptr;
-        sqlite3_prepare_v2(runtime_db, del_lots, -1, &st1, nullptr);
+        if (sqlite3_prepare_v2(runtime_db, del_lots, -1, &st1, nullptr) != SQLITE_OK)
+        {
+            std::cerr << "[DB] Failed to prepare remove lots in removeCity: "
+                      << sqlite3_errmsg(runtime_db) << std::endl;
+            return pdbStatus::PDB_ERR;
+        }
         sqlite3_bind_int(st1, 1, city_id);
         sqlite3_step(st1);
         sqlite3_finalize(st1);
@@ -201,12 +268,22 @@ namespace Parksys
         // Proceed to remove city
         const char *del_city = "DELETE FROM City WHERE city_id = ?;";
         sqlite3_stmt *st2 = nullptr;
-        sqlite3_prepare_v2(runtime_db, del_city, -1, &st2, nullptr);
+        if (sqlite3_prepare_v2(runtime_db, del_city, -1, &st2, nullptr) != SQLITE_OK)
+        {
+            std::cerr << "[DB] Failed to prepare removeCity: " << sqlite3_errmsg(runtime_db) << std::endl;
+            return pdbStatus::PDB_ERR;
+        }
         sqlite3_bind_int(st2, 1, city_id);
         int rc = sqlite3_step(st2);
         sqlite3_finalize(st2);
 
-        return rc == SQLITE_DONE ? pdbStatus::PDB_OK : pdbStatus::PDB_ERR;
+        if (rc == SQLITE_DONE)
+        {
+            flushToDisk();
+            return pdbStatus::PDB_OK;
+        }
+
+        return pdbStatus::PDB_ERR;
     }
 
     pdbStatus Database::addLot(const std::string &name, uint32_t city_id,
@@ -218,10 +295,14 @@ namespace Parksys
         "VALUES(?, ?, ?, ?, ?, ?, ?);";
 
         sqlite3_stmt *stmt = nullptr;
-        sqlite3_prepare_v2(runtime_db, sql, -1, &stmt, nullptr);
+        if (sqlite3_prepare_v2(runtime_db, sql, -1, &stmt, nullptr) != SQLITE_OK)
+        {
+            std::cerr << "[DB] Failed to prepare addLot: " << sqlite3_errmsg(runtime_db) << std::endl;
+            return pdbStatus::PDB_ERR;
+        }
 
         sqlite3_bind_int(stmt, 1, city_id);
-        sqlite3_bind_text(stmt, 2, name.c_str(), -1, SQLITE_STATIC);
+        sqlite3_bind_text(stmt, 2, name.c_str(), -1, SQLITE_TRANSIENT);
         sqlite3_bind_double(stmt, 3, latitude);
         sqlite3_bind_double(stmt, 4, longitude);
         sqlite3_bind_int(stmt, 5, is_hourly ? 1 : 0);
@@ -231,7 +312,13 @@ namespace Parksys
         int rc = sqlite3_step(stmt);
         sqlite3_finalize(stmt);
 
-        return rc == SQLITE_DONE ? pdbStatus::PDB_OK : pdbStatus::PDB_ERR;
+        if (rc == SQLITE_DONE)
+        {
+            flushToDisk();
+            return pdbStatus::PDB_OK;
+        }
+
+        return pdbStatus::PDB_ERR;
     }
 
     pdbStatus Database::removeLot(uint32_t lot_id)
@@ -239,14 +326,24 @@ namespace Parksys
         const char *sql = "DELETE FROM Lot WHERE lot_id = ?;";
 
         sqlite3_stmt *stmt = nullptr;
-        sqlite3_prepare_v2(runtime_db, sql, -1, &stmt, nullptr);
+        if (sqlite3_prepare_v2(runtime_db, sql, -1, &stmt, nullptr) != SQLITE_OK)
+        {
+            std::cerr << "[DB] Failed to prepare removeLot: " << sqlite3_errmsg(runtime_db) << std::endl;
+            return pdbStatus::PDB_ERR;
+        }
 
         sqlite3_bind_int(stmt, 1, lot_id);
 
         int rc = sqlite3_step(stmt);
         sqlite3_finalize(stmt);
 
-        return rc == SQLITE_DONE ? pdbStatus::PDB_OK : pdbStatus::PDB_ERR;
+        if (rc == SQLITE_DONE)
+        {
+            flushToDisk();
+            return pdbStatus::PDB_OK;
+        }
+
+        return pdbStatus::PDB_ERR;
     }
 
     pdbStatus Database::updateLotPrice(uint32_t lot_id, double price, double max_daily)
@@ -258,14 +355,24 @@ namespace Parksys
 
         if (max_daily > 0)
         {
-            sqlite3_prepare_v2(runtime_db, sql_daily, -1, &stmt, nullptr);
+            if (sqlite3_prepare_v2(runtime_db, sql_daily, -1, &stmt, nullptr) != SQLITE_OK)
+            {
+                std::cerr << "[DB] Failed to prepare updateLotPrice: " << sqlite3_errmsg(runtime_db) << std::endl;
+                return pdbStatus::PDB_ERR;
+            }
+            
             sqlite3_bind_double(stmt, 1, price);
             sqlite3_bind_double(stmt, 2, max_daily);
             sqlite3_bind_int(stmt, 3, lot_id);
         }
         else
         {
-            sqlite3_prepare_v2(runtime_db, sql_hourly, -1, &stmt, nullptr);
+            if (sqlite3_prepare_v2(runtime_db, sql_hourly, -1, &stmt, nullptr) != SQLITE_OK)
+            {
+                std::cerr << "[DB] Failed to prepare updateLotPrice: " << sqlite3_errmsg(runtime_db) << std::endl;
+                return pdbStatus::PDB_ERR;
+            }
+
             sqlite3_bind_double(stmt, 1, price);
             sqlite3_bind_int(stmt, 2, lot_id);
         }
@@ -273,7 +380,13 @@ namespace Parksys
         int rc = sqlite3_step(stmt);
         sqlite3_finalize(stmt);
 
-        return rc == SQLITE_DONE ? pdbStatus::PDB_OK : pdbStatus::PDB_ERR;
+        if (rc == SQLITE_DONE)
+        {
+            flushToDisk();
+            return pdbStatus::PDB_OK;
+        }
+
+        return pdbStatus::PDB_ERR;
     }
 
     pdbStatus Database::setLotType(uint32_t lot_id, bool is_hourly)
@@ -281,7 +394,11 @@ namespace Parksys
         const char *sql = "UPDATE Lot SET is_hourly = ? WHERE lot_id = ?;";
 
         sqlite3_stmt *stmt = nullptr;
-        sqlite3_prepare_v2(runtime_db, sql, -1, &stmt, nullptr);
+        if (sqlite3_prepare_v2(runtime_db, sql, -1, &stmt, nullptr) != SQLITE_OK)
+        {
+            std::cerr << "[DB] Failed to prepare setLotType: " << sqlite3_errmsg(runtime_db) << std::endl;
+            return pdbStatus::PDB_ERR;
+        }
 
         sqlite3_bind_int(stmt, 1, is_hourly ? 1 : 0);
         sqlite3_bind_int(stmt, 2, lot_id);
@@ -289,7 +406,13 @@ namespace Parksys
         int rc = sqlite3_step(stmt);
         sqlite3_finalize(stmt);
 
-        return rc == SQLITE_DONE ? pdbStatus::PDB_OK : pdbStatus::PDB_ERR;
+        if (rc == SQLITE_DONE)
+        {
+            flushToDisk();
+            return pdbStatus::PDB_OK;
+        }
+
+        return pdbStatus::PDB_ERR;
     }
 
     static bool backup(sqlite3 *src, sqlite3 *dest)
