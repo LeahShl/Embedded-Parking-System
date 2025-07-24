@@ -1,5 +1,7 @@
 #include "db.hpp"
+#include "conf.hpp"
 #include <iostream>
+#include <limits>
 
 namespace Parksys
 {
@@ -9,7 +11,7 @@ namespace Parksys
         : runtime_db(nullptr), disk_db(nullptr), disk_ok(false)
     {
         // Open runtime database
-        if (sqlite3_open(":memory:", &runtime_db) != SQLITE_OK)
+        if (sqlite3_open(SHM_PATH, &runtime_db) != SQLITE_OK)
         {
             std::cerr << "[DB] Failed to open memory DB: "
                       << sqlite3_errmsg(runtime_db) << std::endl;
@@ -19,6 +21,7 @@ namespace Parksys
         }
 
         // Open database file from filesystem
+        
         if (sqlite3_open(path.c_str(), &disk_db) == SQLITE_OK)
         {
             disk_ok = true;
@@ -106,7 +109,8 @@ namespace Parksys
         sqlite3_stmt *stmt = nullptr;
         if (sqlite3_prepare_v2(runtime_db, sql, -1, &stmt, nullptr) != SQLITE_OK)
         {
-            std::cerr << "[DB] Failed to prepare startParking: " << sqlite3_errmsg(runtime_db) << std::endl;
+            std::cerr << "[DB] Failed to prepare startParking: "
+                      << sqlite3_errmsg(runtime_db) << std::endl;
             return pdbStatus::PDB_ERR;
         }
         
@@ -123,6 +127,7 @@ namespace Parksys
             return pdbStatus::PDB_OK;
         }
 
+        std::cerr << "[DB] Failed to step startParking: " << sqlite3_errmsg(runtime_db) << std::endl;
         return pdbStatus::PDB_ERR;
     }
 
@@ -147,6 +152,8 @@ namespace Parksys
         if (rc != SQLITE_ROW)
         {
             sqlite3_finalize(find);
+
+            std::cerr << "[DB] Failed to step stopParking find: " << sqlite3_errmsg(runtime_db) << std::endl;
             return pdbStatus::PDB_ERR;
         }
 
@@ -185,6 +192,7 @@ namespace Parksys
             return pdbStatus::PDB_OK;
         }
 
+        std::cerr << "[DB] Failed to step stopParking write: " << sqlite3_errmsg(runtime_db) << std::endl;
         return pdbStatus::PDB_ERR;
     }
 
@@ -386,6 +394,7 @@ namespace Parksys
             return pdbStatus::PDB_OK;
         }
 
+        std::cerr << "[DB] Failed to step updateLotPrice: " << sqlite3_errmsg(runtime_db) << std::endl;
         return pdbStatus::PDB_ERR;
     }
 
@@ -429,4 +438,41 @@ namespace Parksys
         sqlite3_backup_finish(b);
         return true;
     }
+
+    bool Database::findClosestLot(float latitude, float longitude, uint32_t &lot_id)
+    {
+        const char *sql = "SELECT lot_id, latitude, longitude FROM Lot;";
+        sqlite3_stmt *stmt = nullptr;
+        if (sqlite3_prepare_v2(runtime_db, sql, -1, &stmt, nullptr) != SQLITE_OK)
+        {
+            std::cerr << "[DB] Failed to prepare findClosesLot: "
+                      << sqlite3_errmsg(runtime_db) << std::endl;
+            return false;
+        }
+
+        double min_dist = std::numeric_limits<double>::max();
+        bool found = false;
+
+        while (sqlite3_step(stmt) == SQLITE_ROW)
+        {
+            uint32_t id = sqlite3_column_int(stmt, 0);
+            double lat = sqlite3_column_double(stmt, 1);
+            double lon = sqlite3_column_double(stmt, 2);
+
+            double dx = lat - latitude;
+            double dy = lon - longitude;
+            double dist = dx * dx + dy * dy;
+
+            if (dist < min_dist)
+            {
+                min_dist = dist;
+                lot_id = id;
+                found = true;
+            }
+        }
+
+        sqlite3_finalize(stmt);
+        return found;
+    }
+
 }

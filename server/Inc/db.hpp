@@ -62,6 +62,19 @@ namespace Parksys
          */
         pdbStatus endParking(uint32_t customer_id, uint32_t timestamp);
 
+        /**
+         * @brief Finds the closest parking lot to given coordinates
+         * 
+         * Will write the closest lot ID to lot_id.
+         * 
+         * @param latitude Latitude of vehicle's location
+         * @param longitude Longitude of vehicle's location
+         * @param lot_id Reference to a variable where the closest lot ID will be stored
+         * @return true if at least one lot exists and the closest was found,
+         * @return false otherwise
+         */
+        bool findClosestLot(float latitude, float longitude, uint32_t &lot_id);
+
         // ---------- Price and data management ----------
 
         /**

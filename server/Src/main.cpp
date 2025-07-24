@@ -5,8 +5,8 @@
 
 int main()
 {
-    Parksys::Database pdb (std::string(DB_PATH));
+    Parksys::Database pdb (std::string(std::getenv("HOME")) + "/" + DB_PATH);
     Parksys::Server server(SERVER_IP, SERVER_PORT, &pdb);
-    server.run();
+    server.run(); 
     return 0;
 }

@@ -45,6 +45,9 @@ Parksys::Server::Server(const std::string &ip, uint16_t port, Parksys::Database 
 Parksys::Server::~Server()
 {
     close(listen_fd);
+
+    // Release shared memory since the server runs no longer
+    std::remove(SHM_PATH);
 }
 
 void Parksys::Server::run()
@@ -131,12 +134,21 @@ bool Parksys::Server::parse_request(const uint8_t *buf, Parksys::Request &req)
 
 void Parksys::Server::handle_request(const Parksys::Request &req)
 {
+    uint32_t lot_id = 0;
+    if (!this->pdb->findClosestLot(req.latitude, req.longitude, lot_id))
+    {
+        std::cerr << "[Server] No parking lots found in database." << std::endl;
+        return;
+    }
+
     switch (req.type) {
     case ReqType::START:
         std::cout << "[Server] | " << req.timestamp
                   << " | START recorded for license " << req.license_id
                   << " at (" << req.latitude << "," << req.longitude << ")"
                   << std::endl;
+        if (this->pdb->startParking(lot_id, req.license_id, req.timestamp) != pdbStatus::PDB_OK)
+            std::cerr << "[Server] Failed to log START" << std::endl;
         break;
 
     case ReqType::STOP:
@@ -144,6 +156,8 @@ void Parksys::Server::handle_request(const Parksys::Request &req)
                   << " | STOP recorded for license " << req.license_id
                   << " at (" << req.latitude << "," << req.longitude << ")"
                   << std::endl;
+        if (this->pdb->endParking(req.license_id, req.timestamp) != pdbStatus::PDB_OK)
+            std::cerr << "[Server] Failed to log STOP" << std::endl;
         break;
 
     default:
