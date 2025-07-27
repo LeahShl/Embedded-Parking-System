@@ -1,6 +1,16 @@
 # Embedded Parking System - Server
 A TCP-based parking event server that tracks vehicle start and stop events. It uses a shared memory SQLite database for real-time performance and persists changes to disk.
 
+## Content
+1. [File Structure](#file-structure)
+2. [Server Logic](#server-logic)
+3. [Build](#build)
+4. [Run Server](#run-server)
+5. [Use Price Updater Utility](#use-price-updater-utility)
+6. [Database Schema](#database-schema)
+7. [Database Storage](#database-storage)
+8. [Logging](#logging)
+
 ## File Structure
 key:
 * File
