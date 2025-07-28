@@ -19,6 +19,14 @@ Parksys::Server::Server(const std::string &ip, uint16_t port, Parksys::Database 
     int opt = 1;
     setsockopt(listen_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
 
+    // set timeout
+    struct timeval timeout;
+    timeout.tv_sec = 60;
+    timeout.tv_usec = 0;
+    setsockopt(listen_fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
+    setsockopt(listen_fd, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout));
+
+
     std::memset(&server_addr, 0, sizeof(server_addr));
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = htons(port);
@@ -115,7 +123,14 @@ bool Parksys::Server::recv_request(int fd, void *buf, size_t size)
 bool Parksys::Server::parse_request(const uint8_t *buf, Parksys::Request &req)
 {
     size_t offset = 0;
-    req.type = static_cast<ReqType>(buf[offset]);
+
+    auto raw_type = buf[offset];
+    if (raw_type > static_cast<uint8_t>(ReqType::STOP)) {
+        std::cerr << "[Server] Invalid ReqType: " << static_cast<int>(raw_type) << std::endl;
+        return false;
+    }
+    req.type = static_cast<ReqType>(raw_type);
+
     offset += sizeof(req.type);
 
     std::memcpy(&req.license_id, buf + offset, sizeof(req.license_id));
@@ -143,21 +158,23 @@ void Parksys::Server::handle_request(const Parksys::Request &req)
 
     switch (req.type) {
     case ReqType::START:
-        std::cout << "[Server] | " << req.timestamp
-                  << " | START recorded for license " << req.license_id
-                  << " at (" << req.latitude << "," << req.longitude << ")"
-                  << std::endl;
         if (this->pdb->startParking(lot_id, req.license_id, req.timestamp) != pdbStatus::PDB_OK)
             std::cerr << "[Server] Failed to log START" << std::endl;
+        else
+            std::cout << "[Server] | " << req.timestamp
+                  << " | START recorded for license " << req.license_id
+                  << " at (" << req.latitude << "," << req.longitude << ") | "
+                  << "Lot " << lot_id << std::endl;
         break;
 
     case ReqType::STOP:
-        std::cout << "[Server] | " << req.timestamp
-                  << " | STOP recorded for license " << req.license_id
-                  << " at (" << req.latitude << "," << req.longitude << ")"
-                  << std::endl;
         if (this->pdb->endParking(req.license_id, req.timestamp) != pdbStatus::PDB_OK)
             std::cerr << "[Server] Failed to log STOP" << std::endl;
+        else
+            std::cout << "[Server] | " << req.timestamp
+                  << " | STOP recorded for license " << req.license_id
+                  << " at (" << req.latitude << "," << req.longitude << ") | "
+                  << "Lot " << lot_id << std::endl;
         break;
 
     default:
