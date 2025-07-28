@@ -1,5 +1,5 @@
-../GPS_sim/Src/gps_sim.c:48:6:StartGPSTask	16	static
-../GPS_sim/Src/gps_sim.c:93:14:rand_float_range	16	static
-../GPS_sim/Src/gps_sim.c:98:17:rand_uint_range	16	static
-../GPS_sim/Src/gps_sim.c:103:13:update_position_randomly	16	static
-../GPS_sim/Src/gps_sim.c:117:6:send_gps_msg	40	static
+../GPS_sim/Src/gps_sim.c:30:6:StartGPSTask	16	static
+../GPS_sim/Src/gps_sim.c:75:14:rand_float_range	16	static
+../GPS_sim/Src/gps_sim.c:80:17:rand_uint_range	16	static
+../GPS_sim/Src/gps_sim.c:85:13:update_position_randomly	16	static
+../GPS_sim/Src/gps_sim.c:99:6:send_gps_msg	40	static

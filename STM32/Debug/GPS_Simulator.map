@@ -358,6 +358,7 @@ Discarded input sections
  .group         0x00000000        0xc ./Core/Src/main.o
  .group         0x00000000        0xc ./Core/Src/main.o
  .group         0x00000000        0xc ./Core/Src/main.o
+ .group         0x00000000        0xc ./Core/Src/main.o
  .text          0x00000000        0x0 ./Core/Src/main.o
  .data          0x00000000        0x0 ./Core/Src/main.o
  .bss           0x00000000        0x0 ./Core/Src/main.o
@@ -3665,6 +3666,7 @@ Discarded input sections
  .group         0x00000000        0xc ./GPS_sim/Src/gps_sim.o
  .group         0x00000000        0xc ./GPS_sim/Src/gps_sim.o
  .group         0x00000000        0xc ./GPS_sim/Src/gps_sim.o
+ .group         0x00000000        0xc ./GPS_sim/Src/gps_sim.o
  .text          0x00000000        0x0 ./GPS_sim/Src/gps_sim.o
  .data          0x00000000        0x0 ./GPS_sim/Src/gps_sim.o
  .bss           0x00000000        0x0 ./GPS_sim/Src/gps_sim.o
@@ -3714,6 +3716,7 @@ Discarded input sections
  .debug_macro   0x00000000       0x44 ./GPS_sim/Src/gps_sim.o
  .debug_macro   0x00000000      0x14d ./GPS_sim/Src/gps_sim.o
  .debug_macro   0x00000000       0x34 ./GPS_sim/Src/gps_sim.o
+ .debug_macro   0x00000000       0x58 ./GPS_sim/Src/gps_sim.o
  .debug_macro   0x00000000      0x13d ./GPS_sim/Src/gps_sim.o
  .debug_macro   0x00000000      0x15a ./GPS_sim/Src/gps_sim.o
  .debug_macro   0x00000000       0xc9 ./GPS_sim/Src/gps_sim.o
@@ -3743,6 +3746,7 @@ Discarded input sections
  .debug_macro   0x00000000       0x16 ./GPS_sim/Src/gps_sim.o
  .debug_macro   0x00000000       0x16 ./GPS_sim/Src/gps_sim.o
  .debug_macro   0x00000000       0x29 ./GPS_sim/Src/gps_sim.o
+ .group         0x00000000        0xc ./GPS_sim/Src/i2c_send.o
  .group         0x00000000        0xc ./GPS_sim/Src/i2c_send.o
  .group         0x00000000        0xc ./GPS_sim/Src/i2c_send.o
  .group         0x00000000        0xc ./GPS_sim/Src/i2c_send.o
@@ -6309,118 +6313,119 @@ LOAD /home/leah/st/stm32cubeide_1.18.1/plugins/com.st.stm32cube.ide.mcu.external
 .iplt           0x0800b4b0        0x0
  .iplt          0x0800b4b0        0x0 /home/leah/st/stm32cubeide_1.18.1/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.linux64_1.0.0.202410170706/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard/crtbegin.o
 
-.rodata         0x0800b4b0      0x534
+.rodata         0x0800b4b0      0x53c
                 0x0800b4b0                        . = ALIGN (0x4)
  *(.rodata)
  .rodata        0x0800b4b0       0x32 ./Core/Src/main.o
  *fill*         0x0800b4e2        0x2 
- .rodata        0x0800b4e4       0x7f ./GPS_sim/Src/i2c_send.o
- *fill*         0x0800b563        0x1 
- .rodata        0x0800b564        0x5 ./Middlewares/Third_Party/FreeRTOS/Source/tasks.o
- *fill*         0x0800b569        0x3 
- .rodata        0x0800b56c        0xd ./Middlewares/Third_Party/FreeRTOS/Source/timers.o
+ .rodata        0x0800b4e4       0x83 ./GPS_sim/Src/i2c_send.o
+ *fill*         0x0800b567        0x1 
+ .rodata        0x0800b568        0x5 ./Middlewares/Third_Party/FreeRTOS/Source/tasks.o
+ *fill*         0x0800b56d        0x3 
+ .rodata        0x0800b570        0xd ./Middlewares/Third_Party/FreeRTOS/Source/timers.o
  *(.rodata*)
- *fill*         0x0800b579        0x3 
+ *fill*         0x0800b57d        0x3 
  .rodata.defaultTask_attributes
-                0x0800b57c       0x24 ./Core/Src/main.o
-                0x0800b57c                defaultTask_attributes
+                0x0800b580       0x24 ./Core/Src/main.o
+                0x0800b580                defaultTask_attributes
  .rodata.GPSTask_attributes
-                0x0800b5a0       0x24 ./Core/Src/main.o
-                0x0800b5a0                GPSTask_attributes
+                0x0800b5a4       0x24 ./Core/Src/main.o
+                0x0800b5a4                GPSTask_attributes
  .rodata.I2CSenderTask_attributes
-                0x0800b5c4       0x24 ./Core/Src/main.o
-                0x0800b5c4                I2CSenderTask_attributes
+                0x0800b5c8       0x24 ./Core/Src/main.o
+                0x0800b5c8                I2CSenderTask_attributes
  .rodata.gpsMsgQueue_attributes
-                0x0800b5e8       0x18 ./Core/Src/main.o
-                0x0800b5e8                gpsMsgQueue_attributes
+                0x0800b5ec       0x18 ./Core/Src/main.o
+                0x0800b5ec                gpsMsgQueue_attributes
  .rodata.AHBPrescTable
-                0x0800b600       0x10 ./Core/Src/system_stm32f7xx.o
-                0x0800b600                AHBPrescTable
+                0x0800b604       0x10 ./Core/Src/system_stm32f7xx.o
+                0x0800b604                AHBPrescTable
  .rodata.APBPrescTable
-                0x0800b610        0x8 ./Core/Src/system_stm32f7xx.o
-                0x0800b610                APBPrescTable
+                0x0800b614        0x8 ./Core/Src/system_stm32f7xx.o
+                0x0800b614                APBPrescTable
  .rodata.srand.str1.1
-                0x0800b618      0x1c9 /home/leah/st/stm32cubeide_1.18.1/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.linux64_1.0.0.202410170706/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-rand.o)
+                0x0800b61c      0x1c9 /home/leah/st/stm32cubeide_1.18.1/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.linux64_1.0.0.202410170706/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-rand.o)
                                  0x6f (size before relaxing)
  .rodata._printf_float.str1.1
-                0x0800b7e1       0x12 /home/leah/st/stm32cubeide_1.18.1/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.linux64_1.0.0.202410170706/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-nano-vfprintf_float.o)
+                0x0800b7e5       0x12 /home/leah/st/stm32cubeide_1.18.1/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.linux64_1.0.0.202410170706/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-nano-vfprintf_float.o)
  .rodata._printf_i.str1.1
-                0x0800b7e1       0x22 /home/leah/st/stm32cubeide_1.18.1/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.linux64_1.0.0.202410170706/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-nano-vfprintf_i.o)
+                0x0800b7e5       0x22 /home/leah/st/stm32cubeide_1.18.1/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.linux64_1.0.0.202410170706/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-nano-vfprintf_i.o)
  .rodata.__assert_func.str1.1
-                0x0800b7e1       0x3d /home/leah/st/stm32cubeide_1.18.1/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.linux64_1.0.0.202410170706/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-assert.o)
+                0x0800b7e5       0x3d /home/leah/st/stm32cubeide_1.18.1/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.linux64_1.0.0.202410170706/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-assert.o)
  .rodata._dtoa_r.str1.1
-                0x0800b7e1       0x8f /home/leah/st/stm32cubeide_1.18.1/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.linux64_1.0.0.202410170706/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-dtoa.o)
+                0x0800b7e5       0x8f /home/leah/st/stm32cubeide_1.18.1/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.linux64_1.0.0.202410170706/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-dtoa.o)
  .rodata._Balloc.str1.1
-                0x0800b7e1       0x70 /home/leah/st/stm32cubeide_1.18.1/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.linux64_1.0.0.202410170706/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-mprec.o)
+                0x0800b7e5       0x70 /home/leah/st/stm32cubeide_1.18.1/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.linux64_1.0.0.202410170706/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-mprec.o)
  .rodata.__multadd.str1.1
-                0x0800b7e1       0x11 /home/leah/st/stm32cubeide_1.18.1/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.linux64_1.0.0.202410170706/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-mprec.o)
- *fill*         0x0800b7e1        0x3 
- .rodata.p05.0  0x0800b7e4        0xc /home/leah/st/stm32cubeide_1.18.1/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.linux64_1.0.0.202410170706/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-mprec.o)
+                0x0800b7e5       0x11 /home/leah/st/stm32cubeide_1.18.1/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.linux64_1.0.0.202410170706/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-mprec.o)
+ *fill*         0x0800b7e5        0x3 
+ .rodata.p05.0  0x0800b7e8        0xc /home/leah/st/stm32cubeide_1.18.1/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.linux64_1.0.0.202410170706/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-mprec.o)
+ *fill*         0x0800b7f4        0x4 
  .rodata.__mprec_bigtens
-                0x0800b7f0       0x28 /home/leah/st/stm32cubeide_1.18.1/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.linux64_1.0.0.202410170706/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-mprec.o)
-                0x0800b7f0                __mprec_bigtens
+                0x0800b7f8       0x28 /home/leah/st/stm32cubeide_1.18.1/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.linux64_1.0.0.202410170706/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-mprec.o)
+                0x0800b7f8                __mprec_bigtens
  .rodata.__mprec_tens
-                0x0800b818       0xc8 /home/leah/st/stm32cubeide_1.18.1/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.linux64_1.0.0.202410170706/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-mprec.o)
-                0x0800b818                __mprec_tens
+                0x0800b820       0xc8 /home/leah/st/stm32cubeide_1.18.1/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.linux64_1.0.0.202410170706/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-mprec.o)
+                0x0800b820                __mprec_tens
  .rodata._vfprintf_r.str1.1
-                0x0800b8e0       0x11 /home/leah/st/stm32cubeide_1.18.1/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.linux64_1.0.0.202410170706/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-nano-vfprintf.o)
+                0x0800b8e8       0x11 /home/leah/st/stm32cubeide_1.18.1/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.linux64_1.0.0.202410170706/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-nano-vfprintf.o)
  .rodata._setlocale_r.str1.1
-                0x0800b8e0        0x9 /home/leah/st/stm32cubeide_1.18.1/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.linux64_1.0.0.202410170706/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-locale.o)
+                0x0800b8e8        0x9 /home/leah/st/stm32cubeide_1.18.1/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.linux64_1.0.0.202410170706/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-locale.o)
  .rodata.str1.1
-                0x0800b8e0        0x2 /home/leah/st/stm32cubeide_1.18.1/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.linux64_1.0.0.202410170706/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-locale.o)
+                0x0800b8e8        0x2 /home/leah/st/stm32cubeide_1.18.1/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.linux64_1.0.0.202410170706/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-locale.o)
  .rodata._ctype_
-                0x0800b8e0      0x101 /home/leah/st/stm32cubeide_1.18.1/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.linux64_1.0.0.202410170706/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-ctype_.o)
-                0x0800b8e0                _ctype_
-                0x0800b9e4                        . = ALIGN (0x4)
- *fill*         0x0800b9e1        0x3 
+                0x0800b8e8      0x101 /home/leah/st/stm32cubeide_1.18.1/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.linux64_1.0.0.202410170706/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-ctype_.o)
+                0x0800b8e8                _ctype_
+                0x0800b9ec                        . = ALIGN (0x4)
+ *fill*         0x0800b9e9        0x3 
 
-.ARM.extab      0x0800b9e4        0x0
-                0x0800b9e4                        . = ALIGN (0x4)
+.ARM.extab      0x0800b9ec        0x0
+                0x0800b9ec                        . = ALIGN (0x4)
  *(.ARM.extab* .gnu.linkonce.armextab.*)
-                0x0800b9e4                        . = ALIGN (0x4)
+                0x0800b9ec                        . = ALIGN (0x4)
 
-.ARM            0x0800b9e4        0x8
-                0x0800b9e4                        . = ALIGN (0x4)
-                0x0800b9e4                        __exidx_start = .
+.ARM            0x0800b9ec        0x8
+                0x0800b9ec                        . = ALIGN (0x4)
+                0x0800b9ec                        __exidx_start = .
  *(.ARM.exidx*)
- .ARM.exidx     0x0800b9e4        0x8 /home/leah/st/stm32cubeide_1.18.1/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.linux64_1.0.0.202410170706/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-memchr.o)
- .ARM.exidx     0x0800b9ec        0x0 /home/leah/st/stm32cubeide_1.18.1/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.linux64_1.0.0.202410170706/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-strlen.o)
+ .ARM.exidx     0x0800b9ec        0x8 /home/leah/st/stm32cubeide_1.18.1/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.linux64_1.0.0.202410170706/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-memchr.o)
+ .ARM.exidx     0x0800b9f4        0x0 /home/leah/st/stm32cubeide_1.18.1/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.linux64_1.0.0.202410170706/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-strlen.o)
                                   0x8 (size before relaxing)
- .ARM.exidx     0x0800b9ec        0x0 /home/leah/st/stm32cubeide_1.18.1/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.linux64_1.0.0.202410170706/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard/libgcc.a(_udivmoddi4.o)
+ .ARM.exidx     0x0800b9f4        0x0 /home/leah/st/stm32cubeide_1.18.1/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.linux64_1.0.0.202410170706/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard/libgcc.a(_udivmoddi4.o)
                                   0x8 (size before relaxing)
-                0x0800b9ec                        __exidx_end = .
-                0x0800b9ec                        . = ALIGN (0x4)
+                0x0800b9f4                        __exidx_end = .
+                0x0800b9f4                        . = ALIGN (0x4)
 
-.preinit_array  0x0800b9ec        0x0
-                0x0800b9ec                        . = ALIGN (0x4)
-                0x0800b9ec                        PROVIDE (__preinit_array_start = .)
+.preinit_array  0x0800b9f4        0x0
+                0x0800b9f4                        . = ALIGN (0x4)
+                0x0800b9f4                        PROVIDE (__preinit_array_start = .)
  *(.preinit_array*)
-                0x0800b9ec                        PROVIDE (__preinit_array_end = .)
-                0x0800b9ec                        . = ALIGN (0x4)
+                0x0800b9f4                        PROVIDE (__preinit_array_end = .)
+                0x0800b9f4                        . = ALIGN (0x4)
 
-.init_array     0x0800b9ec        0x4
-                0x0800b9ec                        . = ALIGN (0x4)
-                0x0800b9ec                        PROVIDE (__init_array_start = .)
+.init_array     0x0800b9f4        0x4
+                0x0800b9f4                        . = ALIGN (0x4)
+                0x0800b9f4                        PROVIDE (__init_array_start = .)
  *(SORT_BY_NAME(.init_array.*))
  *(.init_array*)
- .init_array    0x0800b9ec        0x4 /home/leah/st/stm32cubeide_1.18.1/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.linux64_1.0.0.202410170706/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard/crtbegin.o
-                0x0800b9f0                        PROVIDE (__init_array_end = .)
-                0x0800b9f0                        . = ALIGN (0x4)
+ .init_array    0x0800b9f4        0x4 /home/leah/st/stm32cubeide_1.18.1/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.linux64_1.0.0.202410170706/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard/crtbegin.o
+                0x0800b9f8                        PROVIDE (__init_array_end = .)
+                0x0800b9f8                        . = ALIGN (0x4)
 
-.fini_array     0x0800b9f0        0x4
-                0x0800b9f0                        . = ALIGN (0x4)
+.fini_array     0x0800b9f8        0x4
+                0x0800b9f8                        . = ALIGN (0x4)
                 [!provide]                        PROVIDE (__fini_array_start = .)
  *(SORT_BY_NAME(.fini_array.*))
  *(.fini_array*)
- .fini_array    0x0800b9f0        0x4 /home/leah/st/stm32cubeide_1.18.1/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.linux64_1.0.0.202410170706/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard/crtbegin.o
+ .fini_array    0x0800b9f8        0x4 /home/leah/st/stm32cubeide_1.18.1/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.linux64_1.0.0.202410170706/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard/crtbegin.o
                 [!provide]                        PROVIDE (__fini_array_end = .)
-                0x0800b9f4                        . = ALIGN (0x4)
-                0x0800b9f4                        _sidata = LOADADDR (.data)
+                0x0800b9fc                        . = ALIGN (0x4)
+                0x0800b9fc                        _sidata = LOADADDR (.data)
 
-.rel.dyn        0x0800b9f4        0x0
- .rel.iplt      0x0800b9f4        0x0 /home/leah/st/stm32cubeide_1.18.1/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.linux64_1.0.0.202410170706/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard/crtbegin.o
+.rel.dyn        0x0800b9fc        0x0
+ .rel.iplt      0x0800b9fc        0x0 /home/leah/st/stm32cubeide_1.18.1/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.linux64_1.0.0.202410170706/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard/crtbegin.o
 
-.data           0x20000000      0x1d8 load address 0x0800b9f4
+.data           0x20000000      0x1d8 load address 0x0800b9fc
                 0x20000000                        . = ALIGN (0x4)
                 0x20000000                        _sdata = .
  *(.data)
@@ -6453,11 +6458,11 @@ LOAD /home/leah/st/stm32cubeide_1.18.1/plugins/com.st.stm32cube.ide.mcu.external
                 0x200001d8                        . = ALIGN (0x4)
                 0x200001d8                        _edata = .
 
-.igot.plt       0x200001d8        0x0 load address 0x0800bbcc
+.igot.plt       0x200001d8        0x0 load address 0x0800bbd4
  .igot.plt      0x200001d8        0x0 /home/leah/st/stm32cubeide_1.18.1/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.linux64_1.0.0.202410170706/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard/crtbegin.o
                 0x200001d8                        . = ALIGN (0x4)
 
-.bss            0x200001d8     0x52f0 load address 0x0800bbcc
+.bss            0x200001d8     0x52f0 load address 0x0800bbd4
                 0x200001d8                        _sbss = .
                 0x200001d8                        __bss_start__ = _sbss
  *(.bss)
@@ -6614,7 +6619,7 @@ LOAD /home/leah/st/stm32cubeide_1.18.1/plugins/com.st.stm32cube.ide.mcu.external
                 0x200054c8                        __bss_end__ = _ebss
 
 ._user_heap_stack
-                0x200054c8      0x600 load address 0x0800bbcc
+                0x200054c8      0x600 load address 0x0800bbd4
                 0x200054c8                        . = ALIGN (0x8)
                 [!provide]                        PROVIDE (end = .)
                 0x200054c8                        PROVIDE (_end = .)
@@ -6991,84 +6996,86 @@ LOAD /home/leah/st/stm32cubeide_1.18.1/plugins/com.st.stm32cube.ide.mcu.external
  .debug_rnglists
                 0x00001356       0x3b ./Middlewares/Third_Party/FreeRTOS/Source/portable/MemMang/heap_4.o
 
-.debug_macro    0x00000000     0x51ca
- .debug_macro   0x00000000      0x33b ./Core/Src/main.o
- .debug_macro   0x0000033b       0x63 ./Core/Src/main.o
- .debug_macro   0x0000039e      0x13d ./Core/Src/main.o
- .debug_macro   0x000004db       0x66 ./Core/Src/main.o
- .debug_macro   0x00000541       0x74 ./Core/Src/main.o
- .debug_macro   0x000005b5       0xdd ./Core/Src/main.o
- .debug_macro   0x00000692      0x1f1 ./Core/Src/stm32f7xx_hal_msp.o
- .debug_macro   0x00000883      0x1e2 ./Core/Src/stm32f7xx_hal_timebase_tim.o
- .debug_macro   0x00000a65      0x1fb ./Core/Src/stm32f7xx_it.o
- .debug_macro   0x00000c60      0x274 ./Core/Src/syscalls.o
- .debug_macro   0x00000ed4       0x5b ./Core/Src/syscalls.o
- .debug_macro   0x00000f2f       0x94 ./Core/Src/syscalls.o
- .debug_macro   0x00000fc3       0x57 ./Core/Src/syscalls.o
- .debug_macro   0x0000101a       0x10 ./Core/Src/syscalls.o
- .debug_macro   0x0000102a       0x10 ./Core/Src/syscalls.o
- .debug_macro   0x0000103a       0x10 ./Core/Src/syscalls.o
- .debug_macro   0x0000104a       0x10 ./Core/Src/syscalls.o
- .debug_macro   0x0000105a       0x1c ./Core/Src/syscalls.o
- .debug_macro   0x00001076       0x52 ./Core/Src/syscalls.o
- .debug_macro   0x000010c8       0x22 ./Core/Src/syscalls.o
- .debug_macro   0x000010ea       0x10 ./Core/Src/syscalls.o
- .debug_macro   0x000010fa       0x52 ./Core/Src/syscalls.o
- .debug_macro   0x0000114c       0xcf ./Core/Src/syscalls.o
- .debug_macro   0x0000121b       0x1c ./Core/Src/syscalls.o
- .debug_macro   0x00001237       0x3d ./Core/Src/syscalls.o
- .debug_macro   0x00001274       0x35 ./Core/Src/syscalls.o
- .debug_macro   0x000012a9      0x12c ./Core/Src/syscalls.o
- .debug_macro   0x000013d5       0x16 ./Core/Src/syscalls.o
- .debug_macro   0x000013eb       0x16 ./Core/Src/syscalls.o
- .debug_macro   0x00001401       0x29 ./Core/Src/syscalls.o
- .debug_macro   0x0000142a       0x10 ./Core/Src/syscalls.o
- .debug_macro   0x0000143a      0x242 ./Core/Src/syscalls.o
- .debug_macro   0x0000167c       0x1c ./Core/Src/syscalls.o
- .debug_macro   0x00001698       0x10 ./Core/Src/syscalls.o
- .debug_macro   0x000016a8       0x10 ./Core/Src/syscalls.o
- .debug_macro   0x000016b8       0x16 ./Core/Src/syscalls.o
- .debug_macro   0x000016ce      0x146 ./Core/Src/syscalls.o
- .debug_macro   0x00001814      0x18a ./Core/Src/syscalls.o
- .debug_macro   0x0000199e       0x16 ./Core/Src/syscalls.o
- .debug_macro   0x000019b4       0xce ./Core/Src/syscalls.o
- .debug_macro   0x00001a82      0x112 ./Core/Src/sysmem.o
- .debug_macro   0x00001b94      0x23c ./Core/Src/sysmem.o
- .debug_macro   0x00001dd0      0x1e2 ./Core/Src/system_stm32f7xx.o
- .debug_macro   0x00001fb2      0x206 ./Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal.o
- .debug_macro   0x000021b8      0x1e2 ./Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_cortex.o
- .debug_macro   0x0000239a      0x1e8 ./Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_dma.o
- .debug_macro   0x00002582      0x1e8 ./Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_gpio.o
- .debug_macro   0x0000276a      0x2ae ./Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_i2c.o
- .debug_macro   0x00002a18      0x1e2 ./Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_i2c_ex.o
- .debug_macro   0x00002bfa      0x1fa ./Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_pwr_ex.o
- .debug_macro   0x00002df4      0x206 ./Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_rcc.o
- .debug_macro   0x00002ffa      0x1e2 ./Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_rcc_ex.o
- .debug_macro   0x000031dc      0x1e3 ./Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_tim.o
- .debug_macro   0x000033bf      0x1e2 ./Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_tim_ex.o
- .debug_macro   0x000035a1      0x1ff ./Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_uart.o
- .debug_macro   0x000037a0      0x3ed ./GPS_sim/Src/gps_sim.o
- .debug_macro   0x00003b8d       0x16 ./GPS_sim/Src/gps_sim.o
- .debug_macro   0x00003ba3       0x20 ./GPS_sim/Src/gps_sim.o
- .debug_macro   0x00003bc3      0x36f ./GPS_sim/Src/i2c_send.o
- .debug_macro   0x00003f32       0x1c ./GPS_sim/Src/i2c_send.o
- .debug_macro   0x00003f4e      0x259 ./Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.o
- .debug_macro   0x000041a7       0x10 ./Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.o
- .debug_macro   0x000041b7       0x10 ./Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.o
- .debug_macro   0x000041c7       0xd3 ./Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.o
- .debug_macro   0x0000429a       0x16 ./Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.o
- .debug_macro   0x000042b0       0x91 ./Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.o
- .debug_macro   0x00004341       0x8d ./Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.o
- .debug_macro   0x000043ce       0x9a ./Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.o
- .debug_macro   0x00004468      0x199 ./Middlewares/Third_Party/FreeRTOS/Source/list.o
- .debug_macro   0x00004601      0x228 ./Middlewares/Third_Party/FreeRTOS/Source/queue.o
- .debug_macro   0x00004829       0x87 ./Middlewares/Third_Party/FreeRTOS/Source/queue.o
- .debug_macro   0x000048b0      0x291 ./Middlewares/Third_Party/FreeRTOS/Source/tasks.o
- .debug_macro   0x00004b41       0x10 ./Middlewares/Third_Party/FreeRTOS/Source/tasks.o
- .debug_macro   0x00004b51      0x1ee ./Middlewares/Third_Party/FreeRTOS/Source/timers.o
- .debug_macro   0x00004d3f       0x97 ./Middlewares/Third_Party/FreeRTOS/Source/timers.o
- .debug_macro   0x00004dd6      0x234 ./Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM7/r0p1/port.o
- .debug_macro   0x0000500a      0x1c0 ./Middlewares/Third_Party/FreeRTOS/Source/portable/MemMang/heap_4.o
+.debug_macro    0x00000000     0x5229
+ .debug_macro   0x00000000      0x33a ./Core/Src/main.o
+ .debug_macro   0x0000033a       0x63 ./Core/Src/main.o
+ .debug_macro   0x0000039d      0x13d ./Core/Src/main.o
+ .debug_macro   0x000004da       0x66 ./Core/Src/main.o
+ .debug_macro   0x00000540       0x74 ./Core/Src/main.o
+ .debug_macro   0x000005b4       0xdd ./Core/Src/main.o
+ .debug_macro   0x00000691       0x58 ./Core/Src/main.o
+ .debug_macro   0x000006e9      0x1f1 ./Core/Src/stm32f7xx_hal_msp.o
+ .debug_macro   0x000008da      0x1e2 ./Core/Src/stm32f7xx_hal_timebase_tim.o
+ .debug_macro   0x00000abc      0x1fb ./Core/Src/stm32f7xx_it.o
+ .debug_macro   0x00000cb7      0x274 ./Core/Src/syscalls.o
+ .debug_macro   0x00000f2b       0x5b ./Core/Src/syscalls.o
+ .debug_macro   0x00000f86       0x94 ./Core/Src/syscalls.o
+ .debug_macro   0x0000101a       0x57 ./Core/Src/syscalls.o
+ .debug_macro   0x00001071       0x10 ./Core/Src/syscalls.o
+ .debug_macro   0x00001081       0x10 ./Core/Src/syscalls.o
+ .debug_macro   0x00001091       0x10 ./Core/Src/syscalls.o
+ .debug_macro   0x000010a1       0x10 ./Core/Src/syscalls.o
+ .debug_macro   0x000010b1       0x1c ./Core/Src/syscalls.o
+ .debug_macro   0x000010cd       0x52 ./Core/Src/syscalls.o
+ .debug_macro   0x0000111f       0x22 ./Core/Src/syscalls.o
+ .debug_macro   0x00001141       0x10 ./Core/Src/syscalls.o
+ .debug_macro   0x00001151       0x52 ./Core/Src/syscalls.o
+ .debug_macro   0x000011a3       0xcf ./Core/Src/syscalls.o
+ .debug_macro   0x00001272       0x1c ./Core/Src/syscalls.o
+ .debug_macro   0x0000128e       0x3d ./Core/Src/syscalls.o
+ .debug_macro   0x000012cb       0x35 ./Core/Src/syscalls.o
+ .debug_macro   0x00001300      0x12c ./Core/Src/syscalls.o
+ .debug_macro   0x0000142c       0x16 ./Core/Src/syscalls.o
+ .debug_macro   0x00001442       0x16 ./Core/Src/syscalls.o
+ .debug_macro   0x00001458       0x29 ./Core/Src/syscalls.o
+ .debug_macro   0x00001481       0x10 ./Core/Src/syscalls.o
+ .debug_macro   0x00001491      0x242 ./Core/Src/syscalls.o
+ .debug_macro   0x000016d3       0x1c ./Core/Src/syscalls.o
+ .debug_macro   0x000016ef       0x10 ./Core/Src/syscalls.o
+ .debug_macro   0x000016ff       0x10 ./Core/Src/syscalls.o
+ .debug_macro   0x0000170f       0x16 ./Core/Src/syscalls.o
+ .debug_macro   0x00001725      0x146 ./Core/Src/syscalls.o
+ .debug_macro   0x0000186b      0x18a ./Core/Src/syscalls.o
+ .debug_macro   0x000019f5       0x16 ./Core/Src/syscalls.o
+ .debug_macro   0x00001a0b       0xce ./Core/Src/syscalls.o
+ .debug_macro   0x00001ad9      0x112 ./Core/Src/sysmem.o
+ .debug_macro   0x00001beb      0x23c ./Core/Src/sysmem.o
+ .debug_macro   0x00001e27      0x1e2 ./Core/Src/system_stm32f7xx.o
+ .debug_macro   0x00002009      0x206 ./Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal.o
+ .debug_macro   0x0000220f      0x1e2 ./Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_cortex.o
+ .debug_macro   0x000023f1      0x1e8 ./Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_dma.o
+ .debug_macro   0x000025d9      0x1e8 ./Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_gpio.o
+ .debug_macro   0x000027c1      0x2ae ./Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_i2c.o
+ .debug_macro   0x00002a6f      0x1e2 ./Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_i2c_ex.o
+ .debug_macro   0x00002c51      0x1fa ./Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_pwr_ex.o
+ .debug_macro   0x00002e4b      0x206 ./Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_rcc.o
+ .debug_macro   0x00003051      0x1e2 ./Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_rcc_ex.o
+ .debug_macro   0x00003233      0x1e3 ./Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_tim.o
+ .debug_macro   0x00003416      0x1e2 ./Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_tim_ex.o
+ .debug_macro   0x000035f8      0x1ff ./Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_uart.o
+ .debug_macro   0x000037f7      0x39e ./GPS_sim/Src/gps_sim.o
+ .debug_macro   0x00003b95       0x16 ./GPS_sim/Src/gps_sim.o
+ .debug_macro   0x00003bab       0x20 ./GPS_sim/Src/gps_sim.o
+ .debug_macro   0x00003bcb      0x374 ./GPS_sim/Src/i2c_send.o
+ .debug_macro   0x00003f3f       0x52 ./GPS_sim/Src/i2c_send.o
+ .debug_macro   0x00003f91       0x1c ./GPS_sim/Src/i2c_send.o
+ .debug_macro   0x00003fad      0x259 ./Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.o
+ .debug_macro   0x00004206       0x10 ./Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.o
+ .debug_macro   0x00004216       0x10 ./Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.o
+ .debug_macro   0x00004226       0xd3 ./Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.o
+ .debug_macro   0x000042f9       0x16 ./Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.o
+ .debug_macro   0x0000430f       0x91 ./Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.o
+ .debug_macro   0x000043a0       0x8d ./Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.o
+ .debug_macro   0x0000442d       0x9a ./Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.o
+ .debug_macro   0x000044c7      0x199 ./Middlewares/Third_Party/FreeRTOS/Source/list.o
+ .debug_macro   0x00004660      0x228 ./Middlewares/Third_Party/FreeRTOS/Source/queue.o
+ .debug_macro   0x00004888       0x87 ./Middlewares/Third_Party/FreeRTOS/Source/queue.o
+ .debug_macro   0x0000490f      0x291 ./Middlewares/Third_Party/FreeRTOS/Source/tasks.o
+ .debug_macro   0x00004ba0       0x10 ./Middlewares/Third_Party/FreeRTOS/Source/tasks.o
+ .debug_macro   0x00004bb0      0x1ee ./Middlewares/Third_Party/FreeRTOS/Source/timers.o
+ .debug_macro   0x00004d9e       0x97 ./Middlewares/Third_Party/FreeRTOS/Source/timers.o
+ .debug_macro   0x00004e35      0x234 ./Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM7/r0p1/port.o
+ .debug_macro   0x00005069      0x1c0 ./Middlewares/Third_Party/FreeRTOS/Source/portable/MemMang/heap_4.o
 
 .debug_line     0x00000000    0x1e597
  .debug_line    0x00000000      0xc29 ./Core/Src/main.o
@@ -7103,7 +7110,7 @@ LOAD /home/leah/st/stm32cubeide_1.18.1/plugins/com.st.stm32cube.ide.mcu.external
 
 .debug_str      0x00000000    0xffbf7
  .debug_str     0x00000000    0xffbf7 ./Core/Src/main.o
-                              0xf3ce0 (size before relaxing)
+                              0xf3dd2 (size before relaxing)
  .debug_str     0x000ffbf7    0xec382 ./Core/Src/stm32f7xx_hal_msp.o
  .debug_str     0x000ffbf7    0xebb4f ./Core/Src/stm32f7xx_hal_timebase_tim.o
  .debug_str     0x000ffbf7    0xeb7a3 ./Core/Src/stm32f7xx_it.o
@@ -7124,7 +7131,7 @@ LOAD /home/leah/st/stm32cubeide_1.18.1/plugins/com.st.stm32cube.ide.mcu.external
  .debug_str     0x000ffbf7    0xebb84 ./Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_tim_ex.o
  .debug_str     0x000ffbf7    0xebcca ./Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_uart.o
  .debug_str     0x000ffbf7    0xf2bfb ./GPS_sim/Src/gps_sim.o
- .debug_str     0x000ffbf7    0xf3474 ./GPS_sim/Src/i2c_send.o
+ .debug_str     0x000ffbf7    0xf3566 ./GPS_sim/Src/i2c_send.o
  .debug_str     0x000ffbf7     0xf058 ./Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.o
  .debug_str     0x000ffbf7     0xaae2 ./Middlewares/Third_Party/FreeRTOS/Source/list.o
  .debug_str     0x000ffbf7     0xc608 ./Middlewares/Third_Party/FreeRTOS/Source/queue.o

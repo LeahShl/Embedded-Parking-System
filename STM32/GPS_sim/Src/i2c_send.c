@@ -24,7 +24,7 @@ void StartI2CSenderTask(void *argument)
 			else if(msg.msg_type == MSG_START) type_str = "START";
 			else if(msg.msg_type == MSG_STOP) type_str = "STOP";
 
-			printf("Sending %s message: license=%08lu, time=%lu, lat=%.6f, lon=%.6f\n",
+			printf("Sending %s message: license=%08lu, time(sec)=%lu, lat=%.6f, lon=%.6f\n",
 		           type_str, (unsigned long)msg.license_id, (unsigned long)msg.utc_seconds,
 		           msg.latitude, msg.longitude);
 
