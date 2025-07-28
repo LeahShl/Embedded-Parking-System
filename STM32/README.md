@@ -1,6 +1,15 @@
 # Embedded Parking System - STM32 GPS Simulator
 This firmware runs on an STM32 microcontroller and simulates a vehicle parking system by periodically sending messages over I2C to a master (such as a BeagleBone Green, which was used in this project). The messages represent parking events (START parking, STOP parking and IDLE) from vehicles at random intervals and locations within Israel.
 
+## Content
+1. [How it Works](#how-it-works)
+2. [Message Format](#message-format)
+3. [File Structure](#file-structure)
+4. [Build](#build)
+5. [Run](#run)
+6. [Configure](#configure)
+7. [Logging](#logging)
+
 ## How it Works
 The program uses FreeRTOS for multitasking.
 
@@ -10,7 +19,7 @@ The program uses FreeRTOS for multitasking.
 
 ## Message Format
 - 1 byte: Type (0 = IDLE, 1 = START, 2 = STOP)
-- 4 bytes: License ID (000-00-000 - 999-99-999)
+- 4 bytes: License ID (00-000-00 - 999-99-999)
 - 4 bytes: UTC seconds (uint32)
 - 4 bytes: Latitude (float)
 - 4 bytes: Longitude (float)
