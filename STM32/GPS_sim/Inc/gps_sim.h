@@ -28,6 +28,8 @@
 
 #define LICENSE_ID 12345678U     // Device's license id
 
+#define START_UTC 1751371200     // Tuesday, July 1, 2025 12:00:00 PM
+
 typedef enum {
     MSG_IDLE = 0,
     MSG_START = 1,

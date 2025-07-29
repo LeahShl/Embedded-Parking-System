@@ -4,9 +4,9 @@ const char *type_str(uint8_t t)
 {
     switch (t)
     {
-        case 0: return "IDLE";
-        case 1: return "START";
-        case 2: return "STOP";
+        case MSGT_IDLE: return "IDLE";
+        case MSGT_START: return "START";
+        case MSGT_STOP: return "STOP";
         default: return "UNKNOWN";
     }
 }

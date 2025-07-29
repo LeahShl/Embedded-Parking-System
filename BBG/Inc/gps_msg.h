@@ -9,7 +9,19 @@
 
 #include <stdint.h>
 
-#define MSG_LEN 17  // 1 + 4 + 4 + 4 + 4
+#define MIN_LICENSE 1000000            // Min lisence plate ID
+
+#define LAT_MIN 29.5                   // Minimum latitute
+#define LAT_MAX 33.3                   // Maximun latitude
+#define LON_MIN 34.2                   // Minimum longitude
+#define LON_MAX 35.9                   // Maximum longitude
+
+#define MIN_UTC 1751371200             // Tuesday, July 1, 2025 12:00:00 PM
+
+#define MSGT_IDLE 0                    // IDLE message type
+#define MSGT_START 1                   // START message type
+#define MSGT_STOP 2                    // STOP message type
+#define MAX_MSGT MSGT_STOP             // Maximum message type
 
 typedef struct __attribute__((packed))
 {
@@ -19,6 +31,8 @@ typedef struct __attribute__((packed))
     float    latitude;                 // degrees
     float    longitude;                // degrees
 } gps_msg_t;
+
+#define MSG_LEN sizeof(gps_msg_t)
 
 /**
  * @brief Converts message type value to string

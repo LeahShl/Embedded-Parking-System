@@ -17,7 +17,7 @@ static void update_position_randomly(void);
 static void send_gps_msg(msg_type_t type);
 
 // Globals
-volatile uint32_t utc_seconds = 1751371200; // Tuesday, July 1, 2025 12:00:00 PM
+volatile uint32_t utc_seconds = START_UTC; 
 static float lat = 0.0f;
 static float lon = 0.0f;
 static uint8_t is_parking = 0;

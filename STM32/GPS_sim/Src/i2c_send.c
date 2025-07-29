@@ -10,7 +10,8 @@
 #include <stdio.h>
 #include <time.h>
 
-#define I2C_TIMO 1000 // I2C timeout ms
+#define I2C_TIMO 1000            // I2C timeout ms
+#define TS_BUF_SIZE 64           // Timastamp buffer size
 
 extern I2C_HandleTypeDef hi2c1;
 extern osMessageQueueId_t gpsMsgQueueHandle;
@@ -29,7 +30,7 @@ void StartI2CSenderTask(void *argument)
 			else if(msg.msg_type == MSG_START) type_str = "START";
 			else if(msg.msg_type == MSG_STOP) type_str = "STOP";
 
-			char buf[64];
+			char buf[TS_BUF_SIZE];
 			utc_to_str(msg.utc_seconds, buf);
 
 			printf("Sending %s message: license=%08lu, %s, lat=%.6f, lon=%.6f\n",
@@ -54,5 +55,5 @@ static void utc_to_str(uint32_t utc_sec, char *buf)
 
 	ts = gmtime(&utc_tim);
 
-	strftime(buf, 64, "%Y-%m-%d %H:%M:%S UTC", ts);
+	strftime(buf, TS_BUF_SIZE, "%Y-%m-%d %H:%M:%S UTC", ts);
 }

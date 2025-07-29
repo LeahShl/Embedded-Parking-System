@@ -16,6 +16,18 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <syslog.h>
+#include <time.h>
+
+#define SMALL_DELAY 500
+
+/**
+ * @brief memcpy wrapper that validates the data it copies
+ * 
+ * @param msg Destination
+ * @param buf Source buffer
+ * @return int 1 if successful, 0 otherwise
+ */
+static int memcpy_validate(gps_msg_t *msg, uint8_t *buf);
 
 void run_i2c_process(int write_fd, const Config *cfg)
 {
@@ -42,11 +54,11 @@ void run_i2c_process(int write_fd, const Config *cfg)
 
         if (rd < 0)
         {
-            if (errno == EAGAIN || errno == EINTR || errno == EBUSY || errno == EIO || errno == ENXIO)
+            if (errno == EAGAIN || errno == EINTR || errno == EBUSY
+                || errno == EIO || errno == ENXIO || errno == EREMOTEIO)
             {
-                syslog(LOG_WARNING, "[I2C] Warning: read failed (%s), retrying...\n", strerror(errno));
-                usleep(500000);
-                continue;
+                syslog(LOG_ERR, "[I2C] Error: read failed (%s), retrying...\n", strerror(errno));
+                usleep(SMALL_DELAY);
             }
             continue;
         }
@@ -54,38 +66,69 @@ void run_i2c_process(int write_fd, const Config *cfg)
         if (rd != MSG_LEN)
         {
             syslog(LOG_WARNING, "[I2C] short read: %zd/%d bytes, retrying...\n", rd, MSG_LEN);
-            usleep(100000);
+            usleep(SMALL_DELAY);
             continue;
         }
 
         gps_msg_t msg;
-        memcpy(&msg, buf, sizeof(msg));
 
-        if (msg.msg_type > 2)
+        if (memcpy_validate(&msg, buf))
         {
-            syslog(LOG_WARNING, "[I2C] Invalid msg_type %u, skipping\n", msg.msg_type);
-            continue;
-        }
+            const time_t msg_time = msg.utc_sec;
 
-        if (msg.msg_type == 0)
-        syslog(LOG_INFO, "[I2C] msg_type=%s(%u), license=%08u, utc_sec=%u, lat=%.6f, lon=%.6f\n",
-               type_str(msg.msg_type),
-               msg.msg_type,
-               msg.license_id,
-               msg.utc_sec,
-               msg.latitude,
-               msg.longitude);
+            if (msg.msg_type == 0)
+                syslog(LOG_INFO, "[I2C] msg_type=%s(%u), license=%08u, lat=%.6f, lon=%.6f, %s",
+                    type_str(msg.msg_type),
+                    msg.msg_type,
+                    msg.license_id,
+                    msg.latitude,
+                    msg.longitude,
+                    asctime(gmtime(&msg_time)));
 
-        // Forward only START/STOP messages to pipe
-        if (msg.msg_type == 1 || msg.msg_type == 2) {
-            ssize_t wr = write(write_fd, &msg, sizeof(msg));
-            if (wr != sizeof(msg)) {
-                syslog(LOG_ERR, "[I2C] Failed to write to pipe: %s\n", strerror(errno));
+            // Forward only START/STOP messages to pipe
+            if (msg.msg_type == 1 || msg.msg_type == 2) {
+                ssize_t wr = write(write_fd, &msg, sizeof(msg));
+                if (wr != sizeof(msg)) {
+                    syslog(LOG_ERR, "[I2C] Failed to write to pipe: %s\n", strerror(errno));
+                }
             }
         }
+    }
+    close(fd);
+}
 
-        sleep(1);
+static int memcpy_validate(gps_msg_t *msg, uint8_t *buf)
+{
+    memcpy(msg, buf, MSG_LEN);
+
+    if (msg->msg_type > MAX_MSGT)
+    {
+        syslog(LOG_WARNING, "[I2C] Invalid msg_type %u, skipping\n", msg->msg_type);
+        return 0;
     }
 
-    close(fd);
+    if (msg->license_id < MIN_LICENSE)
+    {
+        syslog(LOG_WARNING, "[I2C] Invalid license_id %u, skipping\n", msg->license_id);
+        return 0;
+    }
+
+    if (msg->latitude < LAT_MIN || msg->latitude > LAT_MAX
+        || msg->longitude < LON_MIN || msg->longitude > LON_MAX)
+    {
+        syslog(LOG_WARNING, "[I2C] Invalid coordinates (%.6f,%.6f), skipping\n",
+               msg->latitude, msg->longitude);
+        return 0;
+    }
+
+    const time_t msg_time = msg->utc_sec;
+    
+    if (msg_time < MIN_UTC || msg_time > time(NULL))
+    {
+        syslog(LOG_WARNING, "[I2C] Invalid time (%s), skipping\n",
+               asctime(gmtime(&msg_time)));
+        return 0;
+    }
+
+    return 1;
 }
