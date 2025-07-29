@@ -1,1 +1,2 @@
-../GPS_sim/Src/i2c_send.c:17:6:StartI2CSenderTask	72	static
+../GPS_sim/Src/i2c_send.c:20:6:StartI2CSenderTask	136	static
+../GPS_sim/Src/i2c_send.c:50:13:utc_to_str	32	static
