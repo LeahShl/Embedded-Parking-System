@@ -16,6 +16,12 @@
 #define DEFAULT_SERVICE_PATH "/etc/systemd/system/parksys.service"
 #define CONFIG_PATH "/etc/parksys/parksys.config"
 
+#define MIN_PORT 1024
+#define MAX_PORT 65535
+#define MIN_I2C_ADDR 0x08
+#define MAX_I2C_ADDR 0x77
+
+
 typedef struct {
     char i2c_bus[32];        // path to i2c device, e.g. "/dev/i2c-1"
     int  i2c_addr;           //static void install_service(const Config *cfg) i2c slave address, e.g. 0x10
