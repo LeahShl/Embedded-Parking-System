@@ -8,13 +8,14 @@ namespace Parksys
     static bool backup(sqlite3 *src, sqlite3 *dest);
 
     Database::Database(const std::string &path)
-        : runtime_db(nullptr), disk_db(nullptr), disk_ok(false)
+    : runtime_db(nullptr), disk_db(nullptr), disk_ok(false),
+    log(std::string(std::getenv("HOME")) + "/" + LOG_PATH), 
+    err(std::string(std::getenv("HOME")) + "/" + ERR_PATH)
     {
         // Open runtime database
         if (sqlite3_open(SHM_PATH, &runtime_db) != SQLITE_OK)
         {
-            std::cerr << "[DB] Failed to open memory DB: "
-                      << sqlite3_errmsg(runtime_db) << std::endl;
+            err.threadsafe_log("[DB] Failed to open memory DB: " + std::string(sqlite3_errmsg(runtime_db)));
             sqlite3_close(runtime_db);
             runtime_db = nullptr;
             return;
@@ -27,7 +28,7 @@ namespace Parksys
             disk_ok = true;
             if (!backup(disk_db, runtime_db))
             {
-                std::cerr << "[DB] Backup disk->mem failed\n";
+                err.threadsafe_log("[DB] Backup disk->mem failed");
             }
 
             const char *sql_create_tables =
@@ -62,14 +63,15 @@ namespace Parksys
             char *errmsg = nullptr;
             if (sqlite3_exec(runtime_db, sql_create_tables, nullptr, nullptr, &errmsg) != SQLITE_OK)
             {
-                std::string err = errmsg ? errmsg : "Unknown error";
+                std::string errs = errmsg ? errmsg : "Unknown error";
                 sqlite3_free(errmsg);
-                throw std::runtime_error("Failed to create tables: " + err);
+                err.threadsafe_log("[DB] Failed to create tables: " + errs);
+                throw std::runtime_error("Failed to create tables: " + errs);
             }
         }
         else
         {
-            std::cerr << "[DB] Could not open disk DB, continuing in memory only\n";
+            err.threadsafe_log("[DB] Could not open disk DB, continuing in memory only");
             sqlite3_close(disk_db);
             disk_db = nullptr;
         }
@@ -94,7 +96,7 @@ namespace Parksys
 
         if (!backup(runtime_db, disk_db))
         {
-            std::cerr << "[DB] Backup mem->disk failed\n";
+            err.threadsafe_log("[DB] Backup mem->disk failed");
             return pdbStatus::PDB_ERR;
         }
         return pdbStatus::PDB_OK;
@@ -109,8 +111,8 @@ namespace Parksys
         sqlite3_stmt *stmt = nullptr;
         if (sqlite3_prepare_v2(runtime_db, sql, -1, &stmt, nullptr) != SQLITE_OK)
         {
-            std::cerr << "[DB] Failed to prepare startParking: "
-                      << sqlite3_errmsg(runtime_db) << std::endl;
+            err.threadsafe_log("[DB] Failed to prepare startParking: "
+                               + std::string(sqlite3_errmsg(runtime_db)));
             return pdbStatus::PDB_ERR;
         }
         
@@ -127,7 +129,7 @@ namespace Parksys
             return pdbStatus::PDB_OK;
         }
 
-        std::cerr << "[DB] Failed to step startParking: " << sqlite3_errmsg(runtime_db) << std::endl;
+        err.threadsafe_log("[DB] Failed to step startParking: " + std::string(sqlite3_errmsg(runtime_db)));
         return pdbStatus::PDB_ERR;
     }
 
@@ -142,7 +144,7 @@ namespace Parksys
         sqlite3_stmt *find = nullptr;
         if (sqlite3_prepare_v2(runtime_db, find_sql, -1, &find, nullptr) != SQLITE_OK)
         {
-            std::cerr << "[DB] Failed to prepare endParking find: " << sqlite3_errmsg(runtime_db) << std::endl;
+            err.threadsafe_log("[DB] Failed to prepare endParking find: " + std::string(sqlite3_errmsg(runtime_db)));
             return pdbStatus::PDB_ERR;
         }
         
@@ -152,8 +154,8 @@ namespace Parksys
         if (rc != SQLITE_ROW)
         {
             sqlite3_finalize(find);
-
-            std::cerr << "[DB] Failed to step stopParking find: " << sqlite3_errmsg(runtime_db) << std::endl;
+            err.threadsafe_log("[DB] Failed to step stopParking find: " 
+                               + std::string(sqlite3_errmsg(runtime_db)));
             return pdbStatus::PDB_ERR;
         }
 
@@ -174,7 +176,8 @@ namespace Parksys
         sqlite3_stmt *upd = nullptr;
         if (sqlite3_prepare_v2(runtime_db, upd_sql, -1, &upd, nullptr) != SQLITE_OK)
         {
-            std::cerr << "[DB] Failed to prepare endParking write: " << sqlite3_errmsg(runtime_db) << std::endl;
+            err.threadsafe_log("[DB] Failed to prepare endParking write: " 
+                               + std::string(sqlite3_errmsg(runtime_db)));
             return pdbStatus::PDB_ERR;
         }
         
@@ -192,7 +195,8 @@ namespace Parksys
             return pdbStatus::PDB_OK;
         }
 
-        std::cerr << "[DB] Failed to step stopParking write: " << sqlite3_errmsg(runtime_db) << std::endl;
+        err.threadsafe_log("[DB] Failed to step stopParking write: " 
+                           + std::string(sqlite3_errmsg(runtime_db)));
         return pdbStatus::PDB_ERR;
     }
 
@@ -204,8 +208,8 @@ namespace Parksys
         sqlite3_stmt *stmt = nullptr;
         if (sqlite3_prepare_v2(runtime_db, sql, -1, &stmt, nullptr) != SQLITE_OK)
         {
-            std::cerr << "[DB] Failed to prepare calculatePrice: "
-                      << sqlite3_errmsg(runtime_db) << std::endl;
+            err.threadsafe_log("[DB] Failed to prepare calculatePrice: " 
+                               + std::string(sqlite3_errmsg(runtime_db)));
             return 0.0;
         }
 
@@ -215,7 +219,7 @@ namespace Parksys
         if (rc != SQLITE_ROW)
         {
             sqlite3_finalize(stmt);
-            std::cerr << "[DB] No such lot_id: " << lot_id << " for price calculation\n";
+            err.threadsafe_log("[DB] No such lot_id: " + std::to_string(lot_id) + " for price calculation");
             return 0.0;
         }
 
@@ -240,7 +244,7 @@ namespace Parksys
         sqlite3_stmt *stmt = nullptr;
         if (sqlite3_prepare_v2(runtime_db, sql, -1, &stmt, nullptr) != SQLITE_OK)
         {
-            std::cerr << "[DB] Failed to prepare addCity: " << sqlite3_errmsg(runtime_db) << std::endl;
+            err.threadsafe_log("[DB] Failed to prepare addCity: " + std::string(sqlite3_errmsg(runtime_db)));
             return pdbStatus::PDB_ERR;
         }
 
@@ -265,8 +269,8 @@ namespace Parksys
         sqlite3_stmt *st1 = nullptr;
         if (sqlite3_prepare_v2(runtime_db, del_lots, -1, &st1, nullptr) != SQLITE_OK)
         {
-            std::cerr << "[DB] Failed to prepare remove lots in removeCity: "
-                      << sqlite3_errmsg(runtime_db) << std::endl;
+            err.threadsafe_log("[DB] Failed to prepare remove lots in removeCity: " 
+                               + std::string(sqlite3_errmsg(runtime_db)));
             return pdbStatus::PDB_ERR;
         }
         sqlite3_bind_int(st1, 1, city_id);
@@ -278,7 +282,8 @@ namespace Parksys
         sqlite3_stmt *st2 = nullptr;
         if (sqlite3_prepare_v2(runtime_db, del_city, -1, &st2, nullptr) != SQLITE_OK)
         {
-            std::cerr << "[DB] Failed to prepare removeCity: " << sqlite3_errmsg(runtime_db) << std::endl;
+            err.threadsafe_log("[DB] Failed to prepare removeCity: " 
+                               + std::string(sqlite3_errmsg(runtime_db)));
             return pdbStatus::PDB_ERR;
         }
         sqlite3_bind_int(st2, 1, city_id);
@@ -305,7 +310,8 @@ namespace Parksys
         sqlite3_stmt *stmt = nullptr;
         if (sqlite3_prepare_v2(runtime_db, sql, -1, &stmt, nullptr) != SQLITE_OK)
         {
-            std::cerr << "[DB] Failed to prepare addLot: " << sqlite3_errmsg(runtime_db) << std::endl;
+            err.threadsafe_log("[DB] Failed to prepare addLot: " 
+                               + std::string(sqlite3_errmsg(runtime_db)));
             return pdbStatus::PDB_ERR;
         }
 
@@ -336,7 +342,8 @@ namespace Parksys
         sqlite3_stmt *stmt = nullptr;
         if (sqlite3_prepare_v2(runtime_db, sql, -1, &stmt, nullptr) != SQLITE_OK)
         {
-            std::cerr << "[DB] Failed to prepare removeLot: " << sqlite3_errmsg(runtime_db) << std::endl;
+            err.threadsafe_log("[DB] Failed to prepare removeLot: " 
+                               + std::string(sqlite3_errmsg(runtime_db)));
             return pdbStatus::PDB_ERR;
         }
 
@@ -365,7 +372,8 @@ namespace Parksys
         {
             if (sqlite3_prepare_v2(runtime_db, sql_daily, -1, &stmt, nullptr) != SQLITE_OK)
             {
-                std::cerr << "[DB] Failed to prepare updateLotPrice: " << sqlite3_errmsg(runtime_db) << std::endl;
+                err.threadsafe_log("[DB] Failed to prepare updateLotPrice: " 
+                               + std::string(sqlite3_errmsg(runtime_db)));
                 return pdbStatus::PDB_ERR;
             }
             
@@ -377,7 +385,8 @@ namespace Parksys
         {
             if (sqlite3_prepare_v2(runtime_db, sql_hourly, -1, &stmt, nullptr) != SQLITE_OK)
             {
-                std::cerr << "[DB] Failed to prepare updateLotPrice: " << sqlite3_errmsg(runtime_db) << std::endl;
+                err.threadsafe_log("[DB] Failed to prepare updateLotPrice: " 
+                               + std::string(sqlite3_errmsg(runtime_db)));
                 return pdbStatus::PDB_ERR;
             }
 
@@ -394,7 +403,8 @@ namespace Parksys
             return pdbStatus::PDB_OK;
         }
 
-        std::cerr << "[DB] Failed to step updateLotPrice: " << sqlite3_errmsg(runtime_db) << std::endl;
+        err.threadsafe_log("[DB] Failed to step updateLotPrice: " 
+                               + std::string(sqlite3_errmsg(runtime_db)));
         return pdbStatus::PDB_ERR;
     }
 
@@ -405,7 +415,8 @@ namespace Parksys
         sqlite3_stmt *stmt = nullptr;
         if (sqlite3_prepare_v2(runtime_db, sql, -1, &stmt, nullptr) != SQLITE_OK)
         {
-            std::cerr << "[DB] Failed to prepare setLotType: " << sqlite3_errmsg(runtime_db) << std::endl;
+            err.threadsafe_log("[DB] Failed to prepare setLotType: " 
+                               + std::string(sqlite3_errmsg(runtime_db)));
             return pdbStatus::PDB_ERR;
         }
 
@@ -445,8 +456,8 @@ namespace Parksys
         sqlite3_stmt *stmt = nullptr;
         if (sqlite3_prepare_v2(runtime_db, sql, -1, &stmt, nullptr) != SQLITE_OK)
         {
-            std::cerr << "[DB] Failed to prepare findClosesLot: "
-                      << sqlite3_errmsg(runtime_db) << std::endl;
+            err.threadsafe_log("[DB] Failed to prepare findClosestLot: " 
+                               + std::string(sqlite3_errmsg(runtime_db)));
             return false;
         }
 

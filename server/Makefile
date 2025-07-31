@@ -9,8 +9,8 @@ OBJDIR := Obj
 MAIN    := parksys-server-main
 UPDATER := parksys-price-updater
 
-MAIN_OBJS    := $(OBJDIR)/main.o $(OBJDIR)/server.o $(OBJDIR)/db.o
-UPDATER_OBJS := $(OBJDIR)/price_updater.o $(OBJDIR)/db.o
+MAIN_OBJS    := $(OBJDIR)/main.o $(OBJDIR)/server.o $(OBJDIR)/db.o $(OBJDIR)/logs.o
+UPDATER_OBJS := $(OBJDIR)/price_updater.o $(OBJDIR)/db.o $(OBJDIR)/logs.o
 
 SOURCES  := $(wildcard $(SRCDIR)/*.cpp)
 OBJECTS  := $(patsubst $(SRCDIR)/%.cpp, $(OBJDIR)/%.o, $(SOURCES))

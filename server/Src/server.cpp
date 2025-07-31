@@ -7,11 +7,14 @@
 #include <thread>
 
 Parksys::Server::Server(const std::string &ip, uint16_t port, Parksys::Database *pdb)
-: pdb(pdb)
+: pdb(pdb),
+log(std::string(std::getenv("HOME")) + "/" + LOG_PATH),
+err(std::string(std::getenv("HOME")) + "/" + ERR_PATH)
 {
     listen_fd = socket(AF_INET, SOCK_STREAM, 0);
-    if (listen_fd < 0) {
-        perror("socket");
+    if (listen_fd < 0)
+    {
+        err.threadsafe_log("[SERVER] Failed to create socket");
         throw std::runtime_error("Failed to create socket");
     }
 
@@ -21,8 +24,8 @@ Parksys::Server::Server(const std::string &ip, uint16_t port, Parksys::Database 
 
     // set timeout
     struct timeval timeout;
-    timeout.tv_sec = 60;
-    timeout.tv_usec = 0;
+    timeout.tv_sec = SERV_TIMO_SEC;
+    timeout.tv_usec = SERV_TIMO_MS;
     setsockopt(listen_fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
     setsockopt(listen_fd, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout));
 
@@ -32,22 +35,23 @@ Parksys::Server::Server(const std::string &ip, uint16_t port, Parksys::Database 
     server_addr.sin_port = htons(port);
     if (inet_pton(AF_INET, ip.c_str(), &server_addr.sin_addr) <= 0) {
         close(listen_fd);
+        err.threadsafe_log(std::string("[SERVER] Invalid IP address: ") + ip);
         throw std::runtime_error("Invalid IP address: " + ip);
     }
 
     if (bind(listen_fd, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr)) < 0) {
-        perror("bind");
         close(listen_fd);
+        err.threadsafe_log("[SERVER] Failed to bind socket");
         throw std::runtime_error("Failed to bind socket");
     }
 
     if (listen(listen_fd, REQ_QUEUE_SIZE) < 0) {
-        perror("listen");
         close(listen_fd);
+        err.threadsafe_log("[SERVER] Failed to listen");
         throw std::runtime_error("Failed to listen");
     }
 
-    std::cout << "[Server] Listening on TCP " << ip << ":" << port << std::endl;
+    log.threadsafe_log("[Server] Listening on TCP " + ip + ":" + std::to_string(port));
 }
 
 Parksys::Server::~Server()
@@ -67,7 +71,7 @@ void Parksys::Server::run()
         int client_fd = accept(listen_fd, reinterpret_cast<sockaddr*>(&client_addr), &addrlen);
         if (client_fd < 0)
         {
-            perror("accept");
+            err.threadsafe_log("[SERVER] Timeout reached");
             continue;
         }
 
@@ -82,12 +86,11 @@ void Parksys::Server::run()
 
 void Parksys::Server::handle_client(int client_fd)
 {
-    constexpr size_t req_SIZE = 1 + 4 + 4 + 4 + 4;
-    uint8_t buffer[req_SIZE];
+    uint8_t buffer[REQ_SIZE];
 
     while (true)
     {
-        if (!recv_request(client_fd, buffer, req_SIZE))
+        if (!recv_request(client_fd, buffer, REQ_SIZE))
         {
             break;
         }
@@ -99,7 +102,7 @@ void Parksys::Server::handle_client(int client_fd)
         }
         else
         {
-            std::cerr << "[Server] Received invalid message" << std::endl;
+            err.threadsafe_log("[Server] Received invalid message");
         }
     }
 }
@@ -126,7 +129,7 @@ bool Parksys::Server::parse_request(const uint8_t *buf, Parksys::Request &req)
 
     auto raw_type = buf[offset];
     if (raw_type > static_cast<uint8_t>(ReqType::STOP)) {
-        std::cerr << "[Server] Invalid ReqType: " << static_cast<int>(raw_type) << std::endl;
+        err.threadsafe_log("[Server] Invalid ReqType: " + static_cast<int>(raw_type));
         return false;
     }
     req.type = static_cast<ReqType>(raw_type);
@@ -152,33 +155,33 @@ void Parksys::Server::handle_request(const Parksys::Request &req)
     uint32_t lot_id = 0;
     if (!this->pdb->findClosestLot(req.latitude, req.longitude, lot_id))
     {
-        std::cerr << "[Server] No parking lots found in database." << std::endl;
+        err.threadsafe_log("[Server] No parking lots found in database.");
         return;
     }
 
     switch (req.type) {
     case ReqType::START:
         if (this->pdb->startParking(lot_id, req.license_id, req.timestamp) != pdbStatus::PDB_OK)
-            std::cerr << "[Server] Failed to log START" << std::endl;
+            err.threadsafe_log("[Server] Failed to log START");
         else
-            std::cout << "[Server] | " << req.timestamp
-                  << " | START recorded for license " << req.license_id
-                  << " at (" << req.latitude << "," << req.longitude << ") | "
-                  << "Lot " << lot_id << std::endl;
+            log.threadsafe_log("[Server] | " + std::to_string(req.timestamp) +
+                  " | START recorded for license " + std::to_string(req.license_id) +
+                  " at (" + std::to_string(req.latitude) + "," + std::to_string(req.longitude) + ") | " +
+                  "Lot " + std::to_string(lot_id));
         break;
 
     case ReqType::STOP:
         if (this->pdb->endParking(req.license_id, req.timestamp) != pdbStatus::PDB_OK)
-            std::cerr << "[Server] Failed to log STOP" << std::endl;
+            err.threadsafe_log("[Server] Failed to log STOP");
         else
-            std::cout << "[Server] | " << req.timestamp
-                  << " | STOP recorded for license " << req.license_id
-                  << " at (" << req.latitude << "," << req.longitude << ") | "
-                  << "Lot " << lot_id << std::endl;
+            log.threadsafe_log("[Server] | " + std::to_string(req.timestamp) +
+                  " | STOP recorded for license " + std::to_string(req.license_id) +
+                  " at (" + std::to_string(req.latitude) + "," + std::to_string(req.longitude) + ") | " +
+                  "Lot " + std::to_string(lot_id));
         break;
 
     default:
-        std::cerr << "[Server] Unsupported message type" << std::endl;
+        err.threadsafe_log("[Server] Unsupported message type");
         break;
     }
 }

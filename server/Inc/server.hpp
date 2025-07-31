@@ -1,6 +1,7 @@
 #pragma once
 
 #include "db.hpp"
+#include "logs.hpp"
 #include <cstdint>
 #include <netinet/in.h>
 #include <string>
@@ -25,6 +26,12 @@ namespace Parksys
         float latitude;       // GPS latitude
         float longitude;      // GPS longitude
     };
+
+    const size_t REQ_SIZE = sizeof(ReqType) + 2 * sizeof(uint32_t)
+                            + 2 * sizeof(float); // Request size (packed)
+
+    constexpr time_t SERV_TIMO_SEC = 60,         // Server timeout in second
+                     SERV_TIMO_MS = 0;           // Server timeout in ms (added to seconds)
 
     class Server
     {
@@ -56,6 +63,7 @@ namespace Parksys
         int listen_fd;            // Listening port file descriptor
         sockaddr_in server_addr;  // Server addr struct
         Parksys::Database *pdb;   // Parksys database
+        Logfile log, err;         // Log output files
 
         /**
          * @brief Handles a single client 

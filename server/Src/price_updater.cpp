@@ -1,5 +1,6 @@
 #include "db.hpp"
 #include "conf.hpp"
+#include "logs.hpp"
 #include <iostream>
 #include <string>
 #include <vector>
@@ -21,6 +22,9 @@ static void print_usage()
 
 int main(int argc, char** argv)
 {
+    Logfile log(std::string(std::getenv("HOME")) + "/" + LOG_PATH), 
+            err(std::string(std::getenv("HOME")) + "/" + ERR_PATH);
+
     if (argc < 3)
     {
         print_usage();
@@ -38,6 +42,7 @@ int main(int argc, char** argv)
         if (db.addCity(name) == pdbStatus::PDB_OK)
         {
             std::cout << "City added: " << name << std::endl;
+            log.threadsafe_log("City added: " + name );
         }
         else
         {
@@ -55,6 +60,7 @@ int main(int argc, char** argv)
         {
             db.removeCity(cid);
             std::cout << "City removed.\n";
+            log.threadsafe_log("City with id=" + std::to_string(cid) + " removed");
         }
 
     }
@@ -71,6 +77,7 @@ int main(int argc, char** argv)
         if (db.addLot(name, city_id, lat, lon, is_hourly, price, max_daily) == pdbStatus::PDB_OK)
         {
             std::cout << "Lot added: " << name << std::endl;
+            log.threadsafe_log("Lot added: " + name);
         }
         else
         {
@@ -90,6 +97,7 @@ int main(int argc, char** argv)
         {
             db.removeLot(lid);
             std::cout << "Lot removed.\n";
+            log.threadsafe_log("Lot with id=" + std::to_string(lid) + " removed");
         }
 
     }
@@ -116,14 +124,12 @@ int main(int argc, char** argv)
         {
             bool is_hourly = (argv[5][0]=='h');
             db.setLotType(lid, is_hourly);
-
         }
         else
         {
             print_usage();
             return 1;
         }
-
     }
     else
     {

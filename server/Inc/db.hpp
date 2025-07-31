@@ -1,4 +1,5 @@
 #pragma once
+#include "logs.hpp"
 #include <sqlite3.h>
 #include <string>
 
@@ -137,9 +138,10 @@ namespace Parksys
         pdbStatus setLotType(uint32_t lot_id, bool is_hourly);
 
     private:
-        sqlite3 *runtime_db;
-        sqlite3 *disk_db;
-        bool disk_ok;
+        sqlite3 *runtime_db;      // Runtime shm DB
+        sqlite3 *disk_db;         // Disk backup DB
+        bool disk_ok;             // Is disk DB opened successfully?
+        Logfile log, err;         // Log output files
 
         /**
          * @brief Backup the in-memory runtime database to disk.
